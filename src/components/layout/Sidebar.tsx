@@ -63,8 +63,12 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-r border-border bg-card transition-[width] duration-300 ease-in-out max-md:fixed',
-        isOpen ? 'w-64' : 'w-16',
+        'inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-border bg-card transition-[width] duration-300 ease-in-out max-md:fixed',
+        // Desktop always keeps at least the icon rail (md:w-16); mobile is a
+        // drawer that's either the full width or fully hidden — no rail —
+        // since when closed there'd be no way to reach a toggle button
+        // clipped inside a 0-width element (Header carries a toggle instead).
+        isOpen ? 'max-md:w-64 max-md:border-r md:w-64 md:border-r' : 'max-md:w-0 md:w-16 md:border-r',
       )}
     >
       <div className="flex h-14 shrink-0 items-center justify-between gap-2 px-3">

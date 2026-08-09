@@ -67,6 +67,16 @@ export interface WorkItemPermissions {
   can_delete: boolean
 }
 
+/** Dashboard stat card data — scoped server-side exactly like the work item list. */
+export interface WorkItemStats {
+  total: number
+  open: number
+  in_progress: number
+  pending: number
+  closed: number
+  overdue: number
+}
+
 export interface WorkItemTimelineEntry {
   id: string
   actor: { id: string; name: string } | null

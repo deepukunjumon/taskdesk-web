@@ -1,5 +1,6 @@
-import { Check, LogOut } from 'lucide-react'
+import { Check, LogOut, Menu } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/stores/authStore'
+import { useUiStore } from '@/stores/uiStore'
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/)
@@ -19,11 +21,22 @@ function getInitials(name: string): string {
 export function Header() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
+  const toggleSidebar = useUiStore((state) => state.toggleSidebar)
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-end border-b border-border px-4 sm:px-6">
+    <header className="flex h-14 shrink-0 items-center border-b border-border px-4 sm:px-6">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="md:hidden"
+        onClick={toggleSidebar}
+        aria-label="Toggle sidebar"
+      >
+        <Menu className="size-5" />
+      </Button>
+
       <DropdownMenu>
-        <DropdownMenuTrigger className="relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <DropdownMenuTrigger className="relative ml-auto rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Avatar>
             <AvatarFallback>{user ? getInitials(user.name) : ''}</AvatarFallback>
           </Avatar>

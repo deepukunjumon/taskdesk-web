@@ -5,6 +5,7 @@ import type {
   UpdateWorkItemPayload,
   WorkItem,
   WorkItemFilters,
+  WorkItemStats,
   WorkItemStatus,
 } from '@/types'
 
@@ -12,6 +13,10 @@ export function listWorkItems(filters: WorkItemFilters = {}) {
   return apiClient
     .get<PaginatedResponse<WorkItem>>('/work-items', { params: filters })
     .then((res) => res.data)
+}
+
+export function getWorkItemStats() {
+  return apiClient.get<{ data: WorkItemStats }>('/work-items/stats').then((res) => res.data.data)
 }
 
 export function getWorkItem(id: string) {

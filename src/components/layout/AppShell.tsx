@@ -22,7 +22,7 @@ export function AppShell() {
 
       <div
         className={cn(
-          'flex min-w-0 flex-1 flex-col transition-[filter] duration-300 ease-in-out max-md:ml-16',
+          'flex min-w-0 flex-1 flex-col transition-[filter] duration-300 ease-in-out',
           isSidebarOpen && 'max-md:pointer-events-none max-md:blur-sm',
         )}
       >

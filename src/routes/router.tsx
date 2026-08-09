@@ -3,6 +3,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { LoginPage } from '@/pages/LoginPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { WorkRegisterPage } from '@/pages/WorkRegisterPage'
 import { MyTasksPage } from '@/pages/MyTasksPage'
 import { RequireAuth } from '@/routes/RequireAuth'
@@ -19,7 +20,7 @@ export const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
-          { index: true, element: <PlaceholderPage title="Dashboard" /> },
+          { index: true, element: <DashboardPage /> },
           {
             path: 'work-register',
             element: (
