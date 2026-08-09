@@ -1,5 +1,10 @@
 import type { Role } from './role'
 
+/** Only present when this User represents the authenticated user themself. */
+export interface UserAbilities {
+  can_create_work_items: boolean
+}
+
 export interface User {
   id: string
   name: string
@@ -7,4 +12,5 @@ export interface User {
   department_id: string | null
   roles: Role[]
   created_at: string
+  abilities?: UserAbilities
 }

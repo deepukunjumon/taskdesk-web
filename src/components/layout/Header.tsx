@@ -1,5 +1,20 @@
-import { Button } from '@/components/ui/button'
+import { Check, LogOut } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/stores/authStore'
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  const initials = parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0]
+  return initials.toUpperCase()
+}
 
 export function Header() {
   const user = useAuthStore((state) => state.user)
@@ -7,19 +22,41 @@ export function Header() {
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-end border-b border-border px-4 sm:px-6">
-      <div className="flex items-center gap-2 sm:gap-4">
-        <div className="text-sm">
-          <span className="font-medium">{user?.name}</span>
-          {user?.roles[0] && (
-            <span className="ml-2 hidden rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground capitalize sm:inline">
-              {user.roles[0]}
-            </span>
-          )}
-        </div>
-        <Button variant="outline" size="sm" onClick={() => logout()}>
-          Log out
-        </Button>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Avatar>
+            <AvatarFallback>{user ? getInitials(user.name) : ''}</AvatarFallback>
+          </Avatar>
+          <span
+            role="img"
+            aria-label="Verified"
+            className="absolute -right-0.5 -bottom-0.5 z-10 inline-flex size-3.5 items-center justify-center rounded-full bg-sky-500 text-white ring-2 ring-background"
+          >
+            <Check className="size-2.5" strokeWidth={3} />
+          </span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium">{user?.name}</span>
+              <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
+              {user?.roles[0] && (
+                <span className="mt-1 w-fit rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground capitalize">
+                  {user.roles[0]}
+                </span>
+              )}
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => logout()}
+          >
+            <LogOut className="size-4" />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   )
 }

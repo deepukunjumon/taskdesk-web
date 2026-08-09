@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   BarChart3,
+  CheckSquare,
   ClipboardList,
   LayoutDashboard,
   Menu,
@@ -30,8 +31,14 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Work Register',
     to: '/work-register',
-    roles: ['superadmin', 'admin', 'employee'],
+    roles: ['superadmin', 'admin'],
     icon: ClipboardList,
+  },
+  {
+    label: 'My Tasks',
+    to: '/my-tasks',
+    roles: ['superadmin', 'admin', 'employee'],
+    icon: CheckSquare,
   },
   { label: 'Reports', to: '/reports', roles: ['superadmin', 'admin'], icon: BarChart3 },
   { label: 'Admin', to: '/admin', roles: ['superadmin'], icon: ShieldCheck },
