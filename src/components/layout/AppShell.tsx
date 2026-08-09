@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { Footer } from '@/components/layout/Footer'
 import { useUiStore } from '@/stores/uiStore'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +31,7 @@ export function AppShell() {
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
           <Outlet />
         </main>
+        <Footer />
       </div>
     </div>
   )
