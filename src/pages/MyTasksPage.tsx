@@ -44,6 +44,7 @@ export function MyTasksPage() {
         isError={isError}
         onRowClick={setSelectedItem}
         onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
+        showAssigneeColumn={false}
       />
 
       <WorkItemDetailSheet

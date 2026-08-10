@@ -10,6 +10,14 @@ export type EntryType = (typeof ENTRY_TYPES)[number]
 export const ASSIGNED_BY_OPTIONS = ['self', 'manager', 'ho', 'branch', 'client', 'vendor'] as const
 export type AssignedBy = (typeof ASSIGNED_BY_OPTIONS)[number]
 
+/**
+ * The only values ever selectable in a form — 'self'/'manager' are computed
+ * server-side from created_by vs assigned_to (see WorkItemService), never
+ * client-supplied, so they never appear as options here.
+ */
+export const EXTERNAL_ASSIGNED_BY_OPTIONS = ['ho', 'branch', 'client', 'vendor'] as const
+export type ExternalAssignedBy = (typeof EXTERNAL_ASSIGNED_BY_OPTIONS)[number]
+
 export const PRIORITIES = ['low', 'medium', 'high', 'critical'] as const
 export type Priority = (typeof PRIORITIES)[number]
 
@@ -136,7 +144,8 @@ export interface WorkItemFilters {
 export interface CreateWorkItemPayload {
   department_id: string
   entry_type: EntryType
-  assigned_by: AssignedBy
+  /** Omitted/null lets the backend compute 'self'/'manager' automatically. */
+  assigned_by?: ExternalAssignedBy | null
   assigned_to_id: string
   source: Source
   branch_id?: string | null
@@ -148,7 +157,7 @@ export interface CreateWorkItemPayload {
 
 export interface UpdateWorkItemPayload {
   entry_type?: EntryType
-  assigned_by?: AssignedBy
+  assigned_by?: ExternalAssignedBy | null
   source?: Source
   branch_id?: string | null
   category_id?: string | null

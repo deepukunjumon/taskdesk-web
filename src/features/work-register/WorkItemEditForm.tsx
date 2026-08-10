@@ -15,7 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { workItemEditSchema, type WorkItemEditValues } from '@/features/work-register/schema'
 import { useBranches, useCategories } from '@/features/work-register/hooks'
-import { ASSIGNED_BY_OPTIONS, ENTRY_TYPES, PRIORITIES, PRIORITY_LABELS, SOURCES } from '@/types'
+import {
+  EXTERNAL_ASSIGNED_BY_OPTIONS,
+  ENTRY_TYPES,
+  PRIORITIES,
+  PRIORITY_LABELS,
+  SOURCES,
+} from '@/types'
 
 interface WorkItemEditFormProps {
   /** Which of this item's fields the backend says this user may edit — drives what renders. */
@@ -46,6 +52,15 @@ export function WorkItemEditForm({
   function handleSubmit(values: WorkItemEditValues) {
     const submitted: Partial<WorkItemEditValues> = {}
     for (const field of editableFields) {
+      // 'self'/'manager' aren't selectable here, so a blank value means "no
+      // external source chosen" — leave the existing computed value alone
+      // rather than submitting an empty string the backend would reject.
+      if (field === 'assigned_by') {
+        if (values.assigned_by) {
+          submitted.assigned_by = values.assigned_by
+        }
+        continue
+      }
       if (field in values) {
         // @ts-expect-error -- field is a validated key of WorkItemEditValues
         submitted[field] = values[field]
@@ -102,15 +117,15 @@ export function WorkItemEditForm({
                 name="assigned_by"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assigned By</FormLabel>
+                    <FormLabel>External Source</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue />
+                          <SelectValue placeholder="None (internal)" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {ASSIGNED_BY_OPTIONS.map((option) => (
+                        {EXTERNAL_ASSIGNED_BY_OPTIONS.map((option) => (
                           <SelectItem key={option} value={option} className="capitalize">
                             {option}
                           </SelectItem>

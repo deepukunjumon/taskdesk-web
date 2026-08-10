@@ -13,7 +13,7 @@ import { PriorityBadge } from '@/features/work-register/PriorityBadge'
 import { TablePagination } from '@/features/work-register/TablePagination'
 import type { PaginatedResponse, WorkItem } from '@/types'
 
-const COLUMNS = [
+const BASE_COLUMNS = [
   'Sl.No',
   'Date',
   'Work ID',
@@ -33,6 +33,8 @@ interface WorkItemsTableProps {
   isError: boolean
   onRowClick: (item: WorkItem) => void
   onPageChange: (page: number) => void
+  /** Every row is already the current user — e.g. My Tasks — so the column is redundant. */
+  showAssigneeColumn?: boolean
 }
 
 export function WorkItemsTable({
@@ -41,7 +43,11 @@ export function WorkItemsTable({
   isError,
   onRowClick,
   onPageChange,
+  showAssigneeColumn = true,
 }: WorkItemsTableProps) {
+  const columns = showAssigneeColumn
+    ? BASE_COLUMNS
+    : BASE_COLUMNS.filter((col) => col !== 'Assigned To')
   if (isError) {
     return (
       <div className="rounded-md border border-dashed p-8 text-center text-sm text-destructive">
@@ -78,7 +84,7 @@ export function WorkItemsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              {COLUMNS.map((col) => (
+              {columns.map((col) => (
                 <TableHead key={col}>{col}</TableHead>
               ))}
             </TableRow>
@@ -95,7 +101,7 @@ export function WorkItemsTable({
                 <TableCell className="font-medium">{item.work_id}</TableCell>
                 <TableCell className="capitalize">{item.entry_type.replace('_', ' ')}</TableCell>
                 <TableCell className="capitalize">{item.assigned_by}</TableCell>
-                <TableCell>{item.assigned_to?.name ?? '—'}</TableCell>
+                {showAssigneeColumn && <TableCell>{item.assigned_to?.name ?? '—'}</TableCell>}
                 <TableCell className="capitalize">{item.source.replace('_', ' ')}</TableCell>
                 <TableCell>{item.branch?.name ?? '—'}</TableCell>
                 <TableCell>

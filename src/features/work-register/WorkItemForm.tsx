@@ -21,7 +21,7 @@ import {
   useDepartments,
 } from '@/features/work-register/hooks'
 import {
-  ASSIGNED_BY_OPTIONS,
+  EXTERNAL_ASSIGNED_BY_OPTIONS,
   ENTRY_TYPES,
   PRIORITIES,
   PRIORITY_LABELS,
@@ -57,7 +57,7 @@ export function WorkItemForm({
     defaultValues: {
       department_id: '',
       entry_type: 'task',
-      assigned_by: 'self',
+      assigned_by: '',
       assigned_to_id: '',
       source: 'internal',
       branch_id: '',
@@ -151,15 +151,15 @@ export function WorkItemForm({
             name="assigned_by"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Assigned By</FormLabel>
+                <FormLabel>External Source</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue placeholder="None (internal)" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {ASSIGNED_BY_OPTIONS.map((option) => (
+                    {EXTERNAL_ASSIGNED_BY_OPTIONS.map((option) => (
                       <SelectItem key={option} value={option} className="capitalize">
                         {option}
                       </SelectItem>

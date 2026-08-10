@@ -8,7 +8,11 @@ import {
 import { WorkItemEditForm } from '@/features/work-register/WorkItemEditForm'
 import { useUpdateWorkItem } from '@/features/work-register/hooks'
 import type { WorkItemEditValues } from '@/features/work-register/schema'
-import type { WorkItem } from '@/types'
+import { EXTERNAL_ASSIGNED_BY_OPTIONS, type ExternalAssignedBy, type WorkItem } from '@/types'
+
+function isExternalAssignedBy(value: WorkItem['assigned_by']): value is ExternalAssignedBy {
+  return (EXTERNAL_ASSIGNED_BY_OPTIONS as readonly string[]).includes(value)
+}
 
 interface WorkItemEditSheetProps {
   item: WorkItem
@@ -23,6 +27,7 @@ export function WorkItemEditSheet({ item, open, onOpenChange }: WorkItemEditShee
     mutation.mutate(
       {
         ...values,
+        assigned_by: 'assigned_by' in values ? values.assigned_by || null : undefined,
         branch_id: 'branch_id' in values ? values.branch_id || null : undefined,
         category_id: 'category_id' in values ? values.category_id || null : undefined,
       },
@@ -32,7 +37,9 @@ export function WorkItemEditSheet({ item, open, onOpenChange }: WorkItemEditShee
 
   const defaultValues: WorkItemEditValues = {
     entry_type: item.entry_type,
-    assigned_by: item.assigned_by,
+    // 'self'/'manager' aren't a valid selection in the (external-only)
+    // dropdown — blank there means "leave the computed value as-is".
+    assigned_by: isExternalAssignedBy(item.assigned_by) ? item.assigned_by : '',
     source: item.source,
     branch_id: item.branch?.id ?? '',
     category_id: item.category?.id ?? '',
