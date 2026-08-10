@@ -29,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    label: 'Work Register',
+    label: 'Task Register',
     to: '/work-register',
     roles: ['superadmin', 'admin'],
     icon: ClipboardList,

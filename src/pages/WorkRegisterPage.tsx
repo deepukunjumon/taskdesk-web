@@ -19,7 +19,7 @@ export function WorkRegisterPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Work Register</h1>
+        <h1 className="text-2xl font-semibold">Task Register</h1>
         {user?.abilities?.can_create_work_items && (
           <Button onClick={() => setCreateOpen(true)}>Add New Task</Button>
         )}

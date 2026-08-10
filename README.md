@@ -3,7 +3,7 @@
 React 19 + TypeScript SPA for TaskDesk.
 
 - **Phase 1**: architectural skeleton — login, protected shell, role-aware routing.
-- **Phase 2**: Work Register — list/filter/create/edit work items, detail drawer with timeline,
+- **Phase 2**: Task Register — list/filter/create/edit work items, detail drawer with timeline,
   constrained status transitions, and a "My Tasks" employee view.
 
 Dashboard, Reports, Admin, Search, and Knowledge Base are still empty scaffolds under `src/features/*`.
@@ -95,9 +95,9 @@ request via an axios interceptor. A 401 response clears the token and redirects 
 (`work-register`/`reports` for `admin`/`superadmin`, `admin` for `superadmin` only) and the sidebar
 filters nav items by the current user's role.
 
-### Work Register
+### Task Register
 
-- `WorkItemsTable` is one reusable component driving both the full Work Register (admin/superadmin,
+- `WorkItemsTable` is one reusable component driving both the full Task Register (admin/superadmin,
   with department/assignee filters) and "My Tasks" (all roles, pre-filtered to the current user) —
   filtering is done via a prop, not a duplicated component.
 - **The frontend holds no permission or workflow rules of its own — every `WorkItem` from the API
