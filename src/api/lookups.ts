@@ -24,3 +24,14 @@ export function listSlaSettings() {
 export function listUsers() {
   return apiClient.get<ApiResponse<User[]>>('/users').then((res) => res.data.data)
 }
+
+/** The actor's own record plus everyone they're allowed to assign a task to. */
+export function listAssignableUsers() {
+  return apiClient.get<ApiResponse<User[]>>('/users/me/assignable').then((res) => res.data.data)
+}
+
+export function updateUserManager(userId: string, managerId: string | null) {
+  return apiClient
+    .patch<ApiResponse<User>>(`/users/${userId}/manager`, { manager_id: managerId })
+    .then((res) => res.data.data)
+}

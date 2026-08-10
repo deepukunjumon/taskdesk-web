@@ -6,6 +6,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { WorkRegisterPage } from '@/pages/WorkRegisterPage'
 import { MyTasksPage } from '@/pages/MyTasksPage'
+import { ReportingStructurePage } from '@/pages/ReportingStructurePage'
 import { RequireAuth } from '@/routes/RequireAuth'
 import { RequireRole } from '@/routes/RequireRole'
 
@@ -24,7 +25,13 @@ export const router = createBrowserRouter([
           {
             path: 'work-register',
             element: (
-              <RequireRole roles={['superadmin', 'admin']}>
+              <RequireRole
+                roles={['superadmin', 'admin', 'user']}
+                predicate={(user) =>
+                  user.roles.some((role) => role === 'superadmin' || role === 'admin') ||
+                  (user.abilities?.is_reporting_manager ?? false)
+                }
+              >
                 <WorkRegisterPage />
               </RequireRole>
             ),
@@ -39,10 +46,10 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: 'admin',
+            path: 'admin/reporting-structure',
             element: (
-              <RequireRole roles={['superadmin']}>
-                <PlaceholderPage title="Admin" />
+              <RequireRole roles={['superadmin', 'admin']}>
+                <ReportingStructurePage />
               </RequireRole>
             ),
           },

@@ -18,10 +18,10 @@ import { PriorityBadge } from '@/features/work-register/PriorityBadge'
 import { StatusTransitionControl } from '@/features/work-register/StatusTransitionControl'
 import { WorkItemEditSheet } from '@/features/work-register/WorkItemEditSheet'
 import {
+  useAssignableUsers,
   useDeleteWorkItem,
   useUpdateWorkItemStatus,
   useReassignWorkItem,
-  useUsers,
   useWorkItem,
 } from '@/features/work-register/hooks'
 import { STATUS_LABELS, type WorkItem, type WorkItemStatus } from '@/types'
@@ -276,13 +276,11 @@ function StatusUpdateControl({ item }: { item: WorkItem }) {
 }
 
 function ReassignControl({ item }: { item: WorkItem }) {
-  const { data: users } = useUsers()
+  const { data: assignableUsers } = useAssignableUsers()
   const [selectedUserId, setSelectedUserId] = useState('')
   const mutation = useReassignWorkItem(item.id)
 
-  const candidates = users?.filter(
-    (u) => u.department_id === item.department?.id && u.id !== item.assigned_to?.id,
-  )
+  const candidates = assignableUsers?.filter((u) => u.id !== item.assigned_to?.id)
 
   return (
     <div className="flex gap-2">
@@ -339,11 +337,11 @@ function TimelineFeed({ entries }: { entries: WorkItem['timeline'] }) {
 }
 
 function describeAction(entry: NonNullable<WorkItem['timeline']>[number]): string {
-  if (entry.action === 'created') return 'created this work item'
-  if (entry.action === 'reassigned') return 'reassigned this work item'
-  if (entry.action === 'deleted') return 'deleted this work item'
+  if (entry.action === 'created') return 'created this task'
+  if (entry.action === 'reassigned') return 'reassigned this task'
+  if (entry.action === 'deleted') return 'deleted this task'
   if (entry.action === 'status_changed' && entry.from_status && entry.to_status) {
     return `changed status from ${STATUS_LABELS[entry.from_status]} to ${STATUS_LABELS[entry.to_status]}`
   }
-  return 'updated this work item'
+  return 'updated this task'
 }

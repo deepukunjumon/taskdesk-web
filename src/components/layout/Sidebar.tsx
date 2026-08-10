@@ -5,43 +5,55 @@ import {
   ClipboardList,
   LayoutDashboard,
   Menu,
-  ShieldCheck,
+  Users,
   X,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/authStore'
 import { SIDEBAR_MOBILE_BREAKPOINT, useUiStore } from '@/stores/uiStore'
-import type { Role } from '@/types'
+import type { Role, User } from '@/types'
 
 interface NavItem {
   label: string
   to: string
   roles: Role[]
   icon: LucideIcon
+  /** Extra gate beyond role — e.g. hiding Task Register from non-managers. */
+  isVisible?: (user: User) => boolean
 }
 
 const NAV_ITEMS: NavItem[] = [
   {
     label: 'Dashboard',
     to: '/',
-    roles: ['superadmin', 'admin', 'employee'],
+    roles: ['superadmin', 'admin', 'user'],
     icon: LayoutDashboard,
   },
   {
     label: 'Task Register',
     to: '/work-register',
-    roles: ['superadmin', 'admin'],
+    roles: ['superadmin', 'admin', 'user'],
     icon: ClipboardList,
+    // A plain user with no reports has nothing to do here — they can only ever
+    // see/manage their own items, which My Tasks already covers.
+    isVisible: (user) =>
+      user.roles.some((role) => role === 'superadmin' || role === 'admin') ||
+      (user.abilities?.is_reporting_manager ?? false),
   },
   {
     label: 'My Tasks',
     to: '/my-tasks',
-    roles: ['superadmin', 'admin', 'employee'],
+    roles: ['superadmin', 'admin', 'user'],
     icon: CheckSquare,
   },
   { label: 'Reports', to: '/reports', roles: ['superadmin', 'admin'], icon: BarChart3 },
-  { label: 'Admin', to: '/admin', roles: ['superadmin'], icon: ShieldCheck },
+  {
+    label: 'Reporting Structure',
+    to: '/admin/reporting-structure',
+    roles: ['superadmin', 'admin'],
+    icon: Users,
+  },
 ]
 
 export function Sidebar() {
@@ -50,9 +62,13 @@ export function Sidebar() {
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
   const closeSidebar = useUiStore((state) => state.closeSidebar)
 
-  const visibleItems = NAV_ITEMS.filter((item) =>
-    user?.roles.some((role) => item.roles.includes(role)),
-  )
+  const visibleItems = user
+    ? NAV_ITEMS.filter(
+        (item) =>
+          item.roles.some((role) => user.roles.includes(role)) &&
+          (item.isVisible ? item.isVisible(user) : true),
+      )
+    : []
 
   function handleNavClick() {
     if (window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT) {

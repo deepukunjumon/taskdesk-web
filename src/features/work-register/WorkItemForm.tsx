@@ -14,7 +14,12 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { workItemFormSchema, type WorkItemFormValues } from '@/features/work-register/schema'
-import { useBranches, useCategories, useDepartments, useUsers } from '@/features/work-register/hooks'
+import {
+  useAssignableUsers,
+  useBranches,
+  useCategories,
+  useDepartments,
+} from '@/features/work-register/hooks'
 import {
   ASSIGNED_BY_OPTIONS,
   ENTRY_TYPES,
@@ -27,9 +32,26 @@ interface WorkItemFormProps {
   onSubmit: (values: WorkItemFormValues) => void
   isSubmitting: boolean
   defaultValues?: Partial<WorkItemFormValues>
+  /**
+   * The task is always for the current user — skip the assignable-users
+   * fetch entirely and hide the "Assigned To" field, since there's nothing
+   * to choose (defaultValues.assigned_to_id is expected to already be set).
+   * If defaultValues.department_id is also already known (the user's own
+   * department), the Department field and its fetch are skipped too — an
+   * employee filing their own task already knows which department it's for.
+   */
+  assignToSelf?: boolean
 }
 
-export function WorkItemForm({ onSubmit, isSubmitting, defaultValues }: WorkItemFormProps) {
+export function WorkItemForm({
+  onSubmit,
+  isSubmitting,
+  defaultValues,
+  assignToSelf = false,
+}: WorkItemFormProps) {
+  const knownDepartmentId = assignToSelf ? defaultValues?.department_id : undefined
+  const hideDepartmentField = !!knownDepartmentId
+
   const form = useForm<WorkItemFormValues>({
     resolver: zodResolver(workItemFormSchema),
     defaultValues: {
@@ -49,14 +71,16 @@ export function WorkItemForm({ onSubmit, isSubmitting, defaultValues }: WorkItem
 
   const departmentId = form.watch('department_id')
 
-  const { data: departments, isLoading: departmentsLoading } = useDepartments()
+  const { data: departments, isLoading: departmentsLoading } = useDepartments(!hideDepartmentField)
   const { data: branches, isLoading: branchesLoading } = useBranches()
   const { data: categories } = useCategories(departmentId || undefined)
-  const { data: users, isLoading: usersLoading } = useUsers()
+  const { data: assignableUsers, isLoading: usersLoading } = useAssignableUsers(!assignToSelf)
 
-  const assignableUsers = users?.filter((u) => !departmentId || u.department_id === departmentId)
-
-  if (departmentsLoading || branchesLoading || usersLoading) {
+  if (
+    (departmentsLoading && !hideDepartmentField) ||
+    branchesLoading ||
+    (usersLoading && !assignToSelf)
+  ) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -69,30 +93,32 @@ export function WorkItemForm({ onSubmit, isSubmitting, defaultValues }: WorkItem
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="department_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Department</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {departments?.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!hideDepartmentField && (
+          <FormField
+            control={form.control}
+            name="department_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Department</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {departments?.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -146,30 +172,32 @@ export function WorkItemForm({ onSubmit, isSubmitting, defaultValues }: WorkItem
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="assigned_to_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Assigned To</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select assignee" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {assignableUsers?.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {!assignToSelf && (
+          <FormField
+            control={form.control}
+            name="assigned_to_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assigned To</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select assignee" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {assignableUsers?.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -304,7 +332,7 @@ export function WorkItemForm({ onSubmit, isSubmitting, defaultValues }: WorkItem
         />
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? 'Saving...' : 'Save Work Item'}
+          {isSubmitting ? 'Saving...' : 'Save Task'}
         </Button>
       </form>
     </Form>

@@ -27,8 +27,8 @@ export function useWorkItem(id: string | null) {
   })
 }
 
-export function useDepartments() {
-  return useQuery({ queryKey: ['departments'], queryFn: lookupsApi.listDepartments })
+export function useDepartments(enabled: boolean = true) {
+  return useQuery({ queryKey: ['departments'], queryFn: lookupsApi.listDepartments, enabled })
 }
 
 export function useBranches() {
@@ -42,8 +42,18 @@ export function useCategories(departmentId?: string) {
   })
 }
 
-export function useUsers() {
-  return useQuery({ queryKey: ['users'], queryFn: lookupsApi.listUsers })
+/** `GET /users` is admin/superadmin-only on the backend — always pass `enabled`. */
+export function useUsers(enabled: boolean = true) {
+  return useQuery({ queryKey: ['users'], queryFn: lookupsApi.listUsers, enabled })
+}
+
+/** Scoped per the current actor — self + descendants, or everyone for admin/superadmin. */
+export function useAssignableUsers(enabled: boolean = true) {
+  return useQuery({
+    queryKey: ['users', 'assignable'],
+    queryFn: lookupsApi.listAssignableUsers,
+    enabled,
+  })
 }
 
 export function useCreateWorkItem() {
@@ -53,9 +63,9 @@ export function useCreateWorkItem() {
     mutationFn: (payload: CreateWorkItemPayload) => workItemsApi.createWorkItem(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [WORK_ITEMS_KEY] })
-      toast.success('Work item created.')
+      toast.success('Task created.')
     },
-    onError: () => toast.error('Could not create the work item.'),
+    onError: () => toast.error('Could not create the task.'),
   })
 }
 
@@ -66,9 +76,9 @@ export function useUpdateWorkItem(id: string) {
     mutationFn: (payload: UpdateWorkItemPayload) => workItemsApi.updateWorkItem(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [WORK_ITEMS_KEY] })
-      toast.success('Work item updated.')
+      toast.success('Task updated.')
     },
-    onError: () => toast.error('Could not update the work item.'),
+    onError: () => toast.error('Could not update the task.'),
   })
 }
 
@@ -102,9 +112,9 @@ export function useReassignWorkItem(id: string) {
       workItemsApi.reassignWorkItem(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [WORK_ITEMS_KEY] })
-      toast.success('Work item reassigned.')
+      toast.success('Task reassigned.')
     },
-    onError: () => toast.error('Could not reassign the work item.'),
+    onError: () => toast.error('Could not reassign the task.'),
   })
 }
 
@@ -115,9 +125,9 @@ export function useDeleteWorkItem(id: string) {
     mutationFn: () => workItemsApi.deleteWorkItem(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [WORK_ITEMS_KEY] })
-      toast.success('Work item deleted.')
+      toast.success('Task deleted.')
     },
-    onError: () => toast.error('Could not delete the work item.'),
+    onError: () => toast.error('Could not delete the task.'),
   })
 }
 

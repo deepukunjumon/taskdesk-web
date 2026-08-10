@@ -26,8 +26,8 @@ export function WorkItemFiltersBar({
   showDepartmentFilter = false,
   showAssigneeFilter = false,
 }: WorkItemFiltersBarProps) {
-  const { data: departments } = useDepartments()
-  const { data: users } = useUsers()
+  const { data: departments } = useDepartments(showDepartmentFilter)
+  const { data: users } = useUsers(showAssigneeFilter)
 
   function set<K extends keyof WorkItemFilters>(key: K, value: WorkItemFilters[K] | undefined) {
     onChange({ ...filters, [key]: value, page: 1 })

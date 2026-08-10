@@ -67,7 +67,7 @@ export interface WorkItemPermissions {
   can_delete: boolean
 }
 
-/** Dashboard stat card data — scoped server-side exactly like the work item list. */
+/** Dashboard stat card data — scoped server-side exactly like the task list. */
 export interface WorkItemStats {
   total: number
   open: number

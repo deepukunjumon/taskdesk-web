@@ -45,7 +45,7 @@ export function WorkItemsTable({
   if (isError) {
     return (
       <div className="rounded-md border border-dashed p-8 text-center text-sm text-destructive">
-        Failed to load work items. Please try again.
+        Failed to load tasks. Please try again.
       </div>
     )
   }
@@ -65,7 +65,7 @@ export function WorkItemsTable({
   if (items.length === 0) {
     return (
       <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-        No work items found. Try adjusting your filters or create a new one.
+        No tasks found. Try adjusting your filters or create a new one.
       </div>
     )
   }
