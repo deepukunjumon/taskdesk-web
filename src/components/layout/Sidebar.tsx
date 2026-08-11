@@ -27,12 +27,18 @@ interface NavLinkItem {
   isVisible?: (user: User) => boolean
 }
 
+interface NavGroupChild {
+  label: string
+  to: string
+  isVisible?: (user: User) => boolean
+}
+
 interface NavGroupItem {
   type: 'group'
   label: string
   roles: Role[]
   icon: LucideIcon
-  children: { label: string; to: string }[]
+  children: NavGroupChild[]
 }
 
 type NavEntry = NavLinkItem | NavGroupItem
@@ -46,23 +52,23 @@ const NAV_ITEMS: NavEntry[] = [
     icon: LayoutDashboard,
   },
   {
-    type: 'link',
-    label: 'Task Register',
-    to: '/work-register',
+    type: 'group',
+    label: 'Task Management',
     roles: ['superadmin', 'admin', 'user'],
     icon: ClipboardList,
-    // A plain user with no reports has nothing to do here — they can only ever
-    // see/manage their own items, which My Tasks already covers.
-    isVisible: (user) =>
-      user.roles.some((role) => role === 'superadmin' || role === 'admin') ||
-      (user.abilities?.is_reporting_manager ?? false),
-  },
-  {
-    type: 'link',
-    label: 'My Tasks',
-    to: '/my-tasks',
-    roles: ['superadmin', 'admin', 'user'],
-    icon: CheckSquare,
+    children: [
+      {
+        label: 'Task Register',
+        to: '/work-register',
+        isVisible: (user) =>
+          user.roles.some((role) => role === 'superadmin' || role === 'admin') ||
+          (user.abilities?.is_reporting_manager ?? false),
+      },
+      {
+        label: 'My Tasks',
+        to: '/my-tasks',
+      },
+    ],
   },
   {
     type: 'link',
@@ -70,13 +76,6 @@ const NAV_ITEMS: NavEntry[] = [
     to: '/reports',
     roles: ['superadmin', 'admin'],
     icon: BarChart3,
-  },
-  {
-    type: 'link',
-    label: 'Reporting Structure',
-    to: '/admin/reporting-structure',
-    roles: ['superadmin', 'admin'],
-    icon: Users,
   },
   {
     type: 'group',
@@ -88,14 +87,29 @@ const NAV_ITEMS: NavEntry[] = [
       { label: 'Categories', to: '/admin/categories' },
     ],
   },
+  {
+    type: 'link',
+    label: 'Reporting Structure',
+    to: '/admin/reporting-structure',
+    roles: ['superadmin', 'admin'],
+    icon: Users,
+  },
 ]
+
+function getVisibleChildren(group: NavGroupItem, user: User): NavGroupChild[] {
+  return group.children.filter((child) => !child.isVisible || child.isVisible(user))
+}
 
 function isItemVisible(item: NavEntry, user: User): boolean {
   if (!item.roles.some((role) => user.roles.includes(role))) {
     return false
   }
 
-  return item.type === 'link' && item.isVisible ? item.isVisible(user) : true
+  if (item.type === 'link') {
+    return item.isVisible ? item.isVisible(user) : true
+  }
+
+  return getVisibleChildren(item, user).length > 0
 }
 
 export function Sidebar() {
@@ -114,8 +128,8 @@ export function Sidebar() {
     }
   }
 
-  function isGroupActive(group: NavGroupItem) {
-    return group.children.some(
+  function isGroupActive(children: NavGroupChild[]) {
+    return children.some(
       (child) => location.pathname === child.to || location.pathname.startsWith(`${child.to}/`),
     )
   }
@@ -143,10 +157,6 @@ export function Sidebar() {
     <aside
       className={cn(
         'inset-y-0 left-0 z-50 flex flex-col overflow-hidden border-border bg-card transition-[width] duration-300 ease-in-out max-md:fixed',
-        // Desktop always keeps at least the icon rail (md:w-16); mobile is a
-        // drawer that's either the full width or fully hidden — no rail —
-        // since when closed there'd be no way to reach a toggle button
-        // clipped inside a 0-width element (Header carries a toggle instead).
         isOpen ? 'max-md:w-64 max-md:border-r md:w-64 md:border-r' : 'max-md:w-0 md:w-16 md:border-r',
       )}
     >
@@ -169,14 +179,14 @@ export function Sidebar() {
           const Icon = item.icon
 
           if (item.type === 'group') {
-            const active = isGroupActive(item)
+            const children = user ? getVisibleChildren(item, user) : []
+            const active = isGroupActive(children)
 
-            // Rail mode has no room for a submenu — go straight to the first child.
             if (!isOpen) {
               return (
                 <NavLink
                   key={item.label}
-                  to={item.children[0].to}
+                  to={children[0].to}
                   onClick={handleNavClick}
                   title={item.label}
                   className={cn(
@@ -209,7 +219,7 @@ export function Sidebar() {
                 </button>
                 {expanded && (
                   <div className="ml-4 flex flex-col gap-1 border-l pl-4">
-                    {item.children.map((child) => (
+                    {children.map((child) => (
                       <NavLink
                         key={child.to}
                         to={child.to}

@@ -53,11 +53,6 @@ export function Header() {
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium">{user?.name}</span>
               <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
-              {user?.roles[0] && (
-                <span className="mt-1 w-fit rounded bg-secondary px-2 py-0.5 text-xs text-secondary-foreground capitalize">
-                  {user.roles[0]}
-                </span>
-              )}
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
