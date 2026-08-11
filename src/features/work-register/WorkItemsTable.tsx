@@ -16,7 +16,7 @@ import type { PaginatedResponse, WorkItem } from '@/types'
 const BASE_COLUMNS = [
   'Sl.No',
   'Date',
-  'Work ID',
+  'Task ID',
   'Entry Type',
   'Assigned By',
   'Assigned To',
