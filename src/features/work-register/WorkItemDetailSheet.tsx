@@ -123,7 +123,7 @@ function WorkItemDetailContent({ item, onClose }: { item: WorkItem; onClose: () 
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
           <Field label="Department" value={item.department?.name} />
           <Field label="Entry Type" value={item.entry_type.replace('_', ' ')} capitalize />
-          <Field label="Assigned By" value={item.assigned_by} capitalize />
+          <Field label="Assigned By" value={item.assigned_by?.name} />
           <Field label="Assigned To" value={item.assigned_to?.name} />
           <Field label="Created By" value={item.created_by?.name} />
           <Field label="Source" value={item.source.replace('_', ' ')} capitalize />

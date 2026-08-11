@@ -100,7 +100,7 @@ export interface WorkItem {
   work_id: string
   department: Department | null
   entry_type: EntryType
-  assigned_by: AssignedBy
+  assigned_by: { id: string; name: string } | null
   assigned_to: { id: string; name: string } | null
   created_by: { id: string; name: string } | null
   source: Source

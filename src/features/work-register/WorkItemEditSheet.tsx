@@ -8,11 +8,7 @@ import {
 import { WorkItemEditForm } from '@/features/work-register/WorkItemEditForm'
 import { useUpdateWorkItem } from '@/features/work-register/hooks'
 import type { WorkItemEditValues } from '@/features/work-register/schema'
-import { EXTERNAL_ASSIGNED_BY_OPTIONS, type ExternalAssignedBy, type WorkItem } from '@/types'
-
-function isExternalAssignedBy(value: WorkItem['assigned_by']): value is ExternalAssignedBy {
-  return (EXTERNAL_ASSIGNED_BY_OPTIONS as readonly string[]).includes(value)
-}
+import type { WorkItem } from '@/types'
 
 interface WorkItemEditSheetProps {
   item: WorkItem
@@ -37,9 +33,10 @@ export function WorkItemEditSheet({ item, open, onOpenChange }: WorkItemEditShee
 
   const defaultValues: WorkItemEditValues = {
     entry_type: item.entry_type,
-    // 'self'/'manager' aren't a valid selection in the (external-only)
-    // dropdown — blank there means "leave the computed value as-is".
-    assigned_by: isExternalAssignedBy(item.assigned_by) ? item.assigned_by : '',
+    // The backend never reports 'assigned_by' as editable (it's a computed
+    // person reference now, not a selectable external source) — this dropdown
+    // never renders, so the default is always blank.
+    assigned_by: '',
     source: item.source,
     branch_id: item.branch?.id ?? '',
     category_id: item.category?.id ?? '',
