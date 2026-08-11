@@ -1,12 +1,9 @@
 import { z } from 'zod'
-import { EXTERNAL_ASSIGNED_BY_OPTIONS, ENTRY_TYPES, PRIORITIES, SOURCES } from '@/types'
+import { ENTRY_TYPES, PRIORITIES, SOURCES } from '@/types'
 
 export const workItemFormSchema = z.object({
   department_id: z.string().uuid('Select a department'),
   entry_type: z.enum(ENTRY_TYPES),
-  // 'self'/'manager' are computed server-side — only an external channel is
-  // ever pickable here, and it's optional (blank means "internal, computed").
-  assigned_by: z.enum(EXTERNAL_ASSIGNED_BY_OPTIONS).optional().or(z.literal('')),
   assigned_to_id: z.string().uuid('Select an assignee'),
   source: z.enum(SOURCES),
   branch_id: z.string().uuid().optional().or(z.literal('')),
@@ -27,7 +24,6 @@ export type WorkItemFormValues = z.infer<typeof workItemFormSchema>
  */
 export const workItemEditSchema = z.object({
   entry_type: z.enum(ENTRY_TYPES).optional(),
-  assigned_by: z.enum(EXTERNAL_ASSIGNED_BY_OPTIONS).optional().or(z.literal('')),
   source: z.enum(SOURCES).optional(),
   branch_id: z.string().uuid().optional().or(z.literal('')),
   category_id: z.string().uuid().optional().or(z.literal('')),

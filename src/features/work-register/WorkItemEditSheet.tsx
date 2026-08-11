@@ -23,7 +23,6 @@ export function WorkItemEditSheet({ item, open, onOpenChange }: WorkItemEditShee
     mutation.mutate(
       {
         ...values,
-        assigned_by: 'assigned_by' in values ? values.assigned_by || null : undefined,
         branch_id: 'branch_id' in values ? values.branch_id || null : undefined,
         category_id: 'category_id' in values ? values.category_id || null : undefined,
       },
@@ -33,10 +32,6 @@ export function WorkItemEditSheet({ item, open, onOpenChange }: WorkItemEditShee
 
   const defaultValues: WorkItemEditValues = {
     entry_type: item.entry_type,
-    // The backend never reports 'assigned_by' as editable (it's a computed
-    // person reference now, not a selectable external source) — this dropdown
-    // never renders, so the default is always blank.
-    assigned_by: '',
     source: item.source,
     branch_id: item.branch?.id ?? '',
     category_id: item.category?.id ?? '',

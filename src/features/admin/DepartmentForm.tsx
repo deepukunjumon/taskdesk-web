@@ -15,12 +15,13 @@ import { departmentFormSchema, type DepartmentFormValues } from '@/features/admi
 interface DepartmentFormProps {
   onSubmit: (values: DepartmentFormValues) => void
   isSubmitting: boolean
+  defaultValues?: DepartmentFormValues
 }
 
-export function DepartmentForm({ onSubmit, isSubmitting }: DepartmentFormProps) {
+export function DepartmentForm({ onSubmit, isSubmitting, defaultValues }: DepartmentFormProps) {
   const form = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentFormSchema),
-    defaultValues: { name: '', code: '' },
+    defaultValues: defaultValues ?? { name: '', code: '' },
   })
 
   return (

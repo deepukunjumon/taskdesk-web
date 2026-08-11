@@ -20,14 +20,15 @@ const NO_DEPARTMENT = '__none__'
 interface CategoryFormProps {
   onSubmit: (values: CategoryFormValues) => void
   isSubmitting: boolean
+  defaultValues?: CategoryFormValues
 }
 
-export function CategoryForm({ onSubmit, isSubmitting }: CategoryFormProps) {
+export function CategoryForm({ onSubmit, isSubmitting, defaultValues }: CategoryFormProps) {
   const { data: departments, isLoading: departmentsLoading } = useDepartments()
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
-    defaultValues: { name: '', department_id: '' },
+    defaultValues: defaultValues ?? { name: '', department_id: '' },
   })
 
   if (departmentsLoading) {

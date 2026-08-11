@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,13 +21,8 @@ import {
   useCategories,
   useDepartments,
 } from '@/features/work-register/hooks'
-import {
-  EXTERNAL_ASSIGNED_BY_OPTIONS,
-  ENTRY_TYPES,
-  PRIORITIES,
-  PRIORITY_LABELS,
-  SOURCES,
-} from '@/types'
+import { useAuthStore } from '@/stores/authStore'
+import { ENTRY_TYPES, PRIORITIES, PRIORITY_LABELS, SOURCES } from '@/types'
 
 interface WorkItemFormProps {
   onSubmit: (values: WorkItemFormValues) => void
@@ -57,7 +53,6 @@ export function WorkItemForm({
     defaultValues: {
       department_id: '',
       entry_type: 'task',
-      assigned_by: '',
       assigned_to_id: '',
       source: 'internal',
       branch_id: '',
@@ -70,17 +65,37 @@ export function WorkItemForm({
   })
 
   const departmentId = form.watch('department_id')
+  const user = useAuthStore((state) => state.user)
+  const isManager = user ? user.roles.every((role) => role === 'user') : false
 
   const { data: departments, isLoading: departmentsLoading } = useDepartments(!hideDepartmentField)
   const { data: branches, isLoading: branchesLoading } = useBranches()
   const { data: categories } = useCategories(departmentId || undefined)
-  const { data: assignableUsers, isLoading: usersLoading } = useAssignableUsers(!assignToSelf)
+  // Unscoped — used only to derive which departments this actor actually has
+  // a report in, so the Department dropdown never offers one they don't.
+  const { data: allAssignableUsers } = useAssignableUsers(!assignToSelf && isManager)
+  // Rescoped to the chosen department — backs the "Assigned To" options, so
+  // it only ever lists people the backend would actually allow as a target.
+  const { data: assignableUsers, isLoading: usersLoading } = useAssignableUsers(
+    !assignToSelf && !!departmentId,
+    departmentId || undefined,
+  )
 
-  if (
-    (departmentsLoading && !hideDepartmentField) ||
-    branchesLoading ||
-    (usersLoading && !assignToSelf)
-  ) {
+  const allowedDepartmentIds = isManager
+    ? new Set((allAssignableUsers ?? []).map((u) => u.department_id).filter((id): id is string => !!id))
+    : null
+  const departmentOptions = allowedDepartmentIds
+    ? (departments ?? []).filter((dept) => allowedDepartmentIds.has(dept.id))
+    : departments
+
+  useEffect(() => {
+    if (!assignToSelf) {
+      form.setValue('assigned_to_id', '')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departmentId])
+
+  if ((departmentsLoading && !hideDepartmentField) || branchesLoading) {
     return (
       <div className="space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
@@ -93,6 +108,31 @@ export function WorkItemForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="entry_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Entry Type</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {ENTRY_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type === 'task' ? 'Task' : 'Support Call'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {!hideDepartmentField && (
           <FormField
             control={form.control}
@@ -107,7 +147,7 @@ export function WorkItemForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {departments?.map((dept) => (
+                    {departmentOptions?.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id}>
                         {dept.name}
                       </SelectItem>
@@ -120,58 +160,6 @@ export function WorkItemForm({
           />
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="entry_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Entry Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {ENTRY_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type === 'task' ? 'Task' : 'Support Call'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="assigned_by"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>External Source</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="None (internal)" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {EXTERNAL_ASSIGNED_BY_OPTIONS.map((option) => (
-                      <SelectItem key={option} value={option} className="capitalize">
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         {!assignToSelf && (
           <FormField
             control={form.control}
@@ -179,16 +167,28 @@ export function WorkItemForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Assigned To</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={!departmentId || usersLoading}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select assignee" />
+                      <SelectValue
+                        placeholder={
+                          !departmentId
+                            ? 'Select a department first'
+                            : usersLoading
+                              ? 'Loading assignees...'
+                              : 'Select assignee'
+                        }
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {assignableUsers?.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name}
+                    {assignableUsers?.map((assignee) => (
+                      <SelectItem key={assignee.id} value={assignee.id}>
+                        {assignee.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

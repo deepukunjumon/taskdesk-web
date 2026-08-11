@@ -29,7 +29,6 @@ export function WorkItemCreateSheet({
     mutation.mutate(
       {
         ...values,
-        assigned_by: values.assigned_by || null,
         branch_id: values.branch_id || null,
         category_id: values.category_id || null,
       },

@@ -28,11 +28,11 @@ export function useWorkItem(id: string | null) {
 }
 
 export function useDepartments(enabled: boolean = true) {
-  return useQuery({ queryKey: ['departments'], queryFn: lookupsApi.listDepartments, enabled })
+  return useQuery({ queryKey: ['departments'], queryFn: () => lookupsApi.listDepartments(), enabled })
 }
 
 export function useBranches() {
-  return useQuery({ queryKey: ['branches'], queryFn: lookupsApi.listBranches })
+  return useQuery({ queryKey: ['branches'], queryFn: () => lookupsApi.listBranches() })
 }
 
 export function useCategories(departmentId?: string) {
@@ -47,11 +47,15 @@ export function useUsers(enabled: boolean = true) {
   return useQuery({ queryKey: ['users'], queryFn: lookupsApi.listUsers, enabled })
 }
 
-/** Scoped per the current actor — self + descendants, or everyone for admin/superadmin. */
-export function useAssignableUsers(enabled: boolean = true) {
+/**
+ * Scoped per the current actor — self + descendants, or everyone for
+ * admin/superadmin. Passing `departmentId` narrows it to that department,
+ * so the "Assigned To" list stays in sync once a department is picked.
+ */
+export function useAssignableUsers(enabled: boolean = true, departmentId?: string) {
   return useQuery({
-    queryKey: ['users', 'assignable'],
-    queryFn: lookupsApi.listAssignableUsers,
+    queryKey: ['users', 'assignable', departmentId ?? null],
+    queryFn: () => lookupsApi.listAssignableUsers(departmentId),
     enabled,
   })
 }

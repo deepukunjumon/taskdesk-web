@@ -100,7 +100,7 @@ export function WorkItemsTable({
                 <TableCell>{format(new Date(item.created_at), 'dd MMM yyyy')}</TableCell>
                 <TableCell className="font-medium">{item.work_id}</TableCell>
                 <TableCell className="capitalize">{item.entry_type.replace('_', ' ')}</TableCell>
-                <TableCell className="capitalize">{item.assigned_by?.name ?? '—'}</TableCell>
+                <TableCell>{item.assigned_by?.name ?? '—'}</TableCell>
                 {showAssigneeColumn && <TableCell>{item.assigned_to?.name ?? '—'}</TableCell>}
                 <TableCell className="capitalize">{item.source.replace('_', ' ')}</TableCell>
                 <TableCell>{item.branch?.name ?? '—'}</TableCell>

@@ -15,13 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { workItemEditSchema, type WorkItemEditValues } from '@/features/work-register/schema'
 import { useBranches, useCategories } from '@/features/work-register/hooks'
-import {
-  EXTERNAL_ASSIGNED_BY_OPTIONS,
-  ENTRY_TYPES,
-  PRIORITIES,
-  PRIORITY_LABELS,
-  SOURCES,
-} from '@/types'
+import { ENTRY_TYPES, PRIORITIES, PRIORITY_LABELS, SOURCES } from '@/types'
 
 interface WorkItemEditFormProps {
   /** Which of this item's fields the backend says this user may edit — drives what renders. */
@@ -52,15 +46,6 @@ export function WorkItemEditForm({
   function handleSubmit(values: WorkItemEditValues) {
     const submitted: Partial<WorkItemEditValues> = {}
     for (const field of editableFields) {
-      // 'self'/'manager' aren't selectable here, so a blank value means "no
-      // external source chosen" — leave the existing computed value alone
-      // rather than submitting an empty string the backend would reject.
-      if (field === 'assigned_by') {
-        if (values.assigned_by) {
-          submitted.assigned_by = values.assigned_by
-        }
-        continue
-      }
       if (field in values) {
         // @ts-expect-error -- field is a validated key of WorkItemEditValues
         submitted[field] = values[field]
@@ -82,62 +67,31 @@ export function WorkItemEditForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {(editableFields.includes('entry_type') || editableFields.includes('assigned_by')) && (
-          <div className="grid grid-cols-2 gap-4">
-            {editableFields.includes('entry_type') && (
-              <FormField
-                control={form.control}
-                name="entry_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Entry Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {ENTRY_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type === 'task' ? 'Task' : 'Support Call'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        {editableFields.includes('entry_type') && (
+          <FormField
+            control={form.control}
+            name="entry_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Entry Type</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {ENTRY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type === 'task' ? 'Task' : 'Support Call'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
             )}
-
-            {editableFields.includes('assigned_by') && (
-              <FormField
-                control={form.control}
-                name="assigned_by"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>External Source</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="None (internal)" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {EXTERNAL_ASSIGNED_BY_OPTIONS.map((option) => (
-                          <SelectItem key={option} value={option} className="capitalize">
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-          </div>
+          />
         )}
 
         {(editableFields.includes('source') || editableFields.includes('priority')) && (

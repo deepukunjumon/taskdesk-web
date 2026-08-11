@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useDepartments, useUsers } from '@/features/work-register/hooks'
+import { useAssignableUsers, useDepartments } from '@/features/work-register/hooks'
 import {
   ENTRY_TYPES,
   FILTERABLE_STATUSES,
@@ -27,7 +27,10 @@ export function WorkItemFiltersBar({
   showAssigneeFilter = false,
 }: WorkItemFiltersBarProps) {
   const { data: departments } = useDepartments(showDepartmentFilter)
-  const { data: users } = useUsers(showAssigneeFilter)
+  // Scoped per actor — self + hierarchy descendants for a plain manager,
+  // everyone for admin/superadmin — same endpoint the assign-to dropdown
+  // uses, so this filter never needs the admin-only /users endpoint.
+  const { data: assignableUsers } = useAssignableUsers(showAssigneeFilter)
 
   function set<K extends keyof WorkItemFilters>(key: K, value: WorkItemFilters[K] | undefined) {
     onChange({ ...filters, [key]: value, page: 1 })
@@ -141,7 +144,7 @@ export function WorkItemFiltersBar({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Anyone</SelectItem>
-              {users?.map((user) => (
+              {assignableUsers?.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.name}
                 </SelectItem>

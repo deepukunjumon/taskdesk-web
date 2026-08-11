@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   BarChart3,
-  CheckSquare,
   ChevronDown,
   ClipboardList,
   Database,
@@ -83,6 +82,7 @@ const NAV_ITEMS: NavEntry[] = [
     roles: ['superadmin', 'admin'],
     icon: Database,
     children: [
+      { label: 'Branches', to: '/admin/branches' },
       { label: 'Departments', to: '/admin/departments' },
       { label: 'Categories', to: '/admin/categories' },
     ],

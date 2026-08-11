@@ -10,34 +10,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { CategoryCreateSheet } from '@/features/admin/CategoryCreateSheet'
-import { CategoryEditSheet } from '@/features/admin/CategoryEditSheet'
-import { useAdminCategories, useDeleteCategory, useToggleCategoryActive } from '@/features/admin/hooks'
-import { useDepartments } from '@/features/work-register/hooks'
-import type { Category, Department } from '@/types'
+import { BranchCreateSheet } from '@/features/admin/BranchCreateSheet'
+import { BranchEditSheet } from '@/features/admin/BranchEditSheet'
+import { useAdminBranches, useDeleteBranch, useToggleBranchActive } from '@/features/admin/hooks'
+import type { Branch } from '@/types'
 
-function CategoryRow({
-  category,
-  departmentsById,
-}: {
-  category: Category
-  departmentsById: Map<string, Department>
-}) {
+function BranchRow({ branch }: { branch: Branch }) {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
-  const toggleMutation = useToggleCategoryActive(category.id)
-  const deleteMutation = useDeleteCategory(category.id)
+  const toggleMutation = useToggleBranchActive(branch.id)
+  const deleteMutation = useDeleteBranch(branch.id)
 
   return (
     <>
       <TableRow>
-        <TableCell className="font-medium">{category.name}</TableCell>
+        <TableCell className="font-medium">{branch.name}</TableCell>
+        <TableCell>{branch.code}</TableCell>
+        <TableCell className="capitalize">{branch.type}</TableCell>
         <TableCell>
-          {category.department_id ? (departmentsById.get(category.department_id)?.name ?? '—') : '—'}
-        </TableCell>
-        <TableCell>
-          <Badge variant={category.is_active ? 'default' : 'secondary'}>
-            {category.is_active ? 'Active' : 'Inactive'}
+          <Badge variant={branch.is_active ? 'default' : 'secondary'}>
+            {branch.is_active ? 'Active' : 'Inactive'}
           </Badge>
         </TableCell>
         <TableCell>
@@ -67,7 +59,7 @@ function CategoryRow({
                 disabled={toggleMutation.isPending}
                 onClick={() => toggleMutation.mutate()}
               >
-                {category.is_active ? 'Disable' : 'Enable'}
+                {branch.is_active ? 'Disable' : 'Enable'}
               </Button>
               <Button
                 size="sm"
@@ -81,28 +73,25 @@ function CategoryRow({
           )}
         </TableCell>
       </TableRow>
-      <CategoryEditSheet category={category} open={isEditOpen} onOpenChange={setIsEditOpen} />
+      <BranchEditSheet branch={branch} open={isEditOpen} onOpenChange={setIsEditOpen} />
     </>
   )
 }
 
-export function CategoriesPage() {
-  const { data: departments } = useDepartments()
-  const { data: categories, isLoading, isError } = useAdminCategories()
+export function BranchesPage() {
+  const { data: branches, isLoading, isError } = useAdminBranches()
   const [createOpen, setCreateOpen] = useState(false)
-
-  const departmentsById = new Map((departments ?? []).map((dept) => [dept.id, dept]))
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Categories</h1>
+          <h1 className="text-2xl font-semibold">Branches</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Categories optionally belong to a department and classify tasks within it.
+            Branches represent external organizations or locations linked to tasks.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Add Category</Button>
+        <Button onClick={() => setCreateOpen(true)}>Add Branch</Button>
       </div>
 
       {isLoading ? (
@@ -111,37 +100,36 @@ export function CategoriesPage() {
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
-      ) : isError || !categories ? (
-        <p className="text-sm text-destructive">Could not load categories.</p>
+      ) : isError || !branches ? (
+        <p className="text-sm text-destructive">Could not load branches.</p>
       ) : (
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.length === 0 ? (
+              {branches.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
-                    No categories yet.
+                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground">
+                    No branches yet.
                   </TableCell>
                 </TableRow>
               ) : (
-                categories.map((category) => (
-                  <CategoryRow key={category.id} category={category} departmentsById={departmentsById} />
-                ))
+                branches.map((branch) => <BranchRow key={branch.id} branch={branch} />)
               )}
             </TableBody>
           </Table>
         </div>
       )}
 
-      <CategoryCreateSheet open={createOpen} onOpenChange={setCreateOpen} />
+      <BranchCreateSheet open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   )
 }
