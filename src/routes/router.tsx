@@ -7,6 +7,8 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { WorkRegisterPage } from '@/pages/WorkRegisterPage'
 import { MyTasksPage } from '@/pages/MyTasksPage'
 import { ReportingStructurePage } from '@/pages/ReportingStructurePage'
+import { DepartmentsPage } from '@/pages/DepartmentsPage'
+import { CategoriesPage } from '@/pages/CategoriesPage'
 import { RequireAuth } from '@/routes/RequireAuth'
 import { RequireRole } from '@/routes/RequireRole'
 
@@ -50,6 +52,22 @@ export const router = createBrowserRouter([
             element: (
               <RequireRole roles={['superadmin', 'admin']}>
                 <ReportingStructurePage />
+              </RequireRole>
+            ),
+          },
+          {
+            path: 'admin/departments',
+            element: (
+              <RequireRole roles={['superadmin', 'admin']}>
+                <DepartmentsPage />
+              </RequireRole>
+            ),
+          },
+          {
+            path: 'admin/categories',
+            element: (
+              <RequireRole roles={['superadmin', 'admin']}>
+                <CategoriesPage />
               </RequireRole>
             ),
           },

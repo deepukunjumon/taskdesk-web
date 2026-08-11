@@ -10,6 +10,12 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      // Every query always refetches — data is never served from a stale
+      // in-memory cache (e.g. a newly added department/category showing up
+      // immediately everywhere it's looked up, not just where it was created).
+      staleTime: 0,
+      gcTime: 0,
+      refetchOnMount: 'always',
     },
   },
 })

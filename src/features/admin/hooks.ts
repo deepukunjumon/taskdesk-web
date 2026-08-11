@@ -18,6 +18,37 @@ export function useUpdateUserManager() {
   })
 }
 
+export function useCreateDepartment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: { name: string; code: string }) => lookupsApi.createDepartment(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['departments'] })
+      toast.success('Department created.')
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error) ?? 'Could not create the department.')
+    },
+  })
+}
+
+export function useCreateCategory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: { name: string; department_id?: string | null }) =>
+      lookupsApi.createCategory(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      toast.success('Category created.')
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error) ?? 'Could not create the category.')
+    },
+  })
+}
+
 function extractErrorMessage(error: unknown): string | null {
   if (
     typeof error === 'object' &&

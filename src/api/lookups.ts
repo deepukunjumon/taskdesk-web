@@ -17,6 +17,16 @@ export function listCategories(departmentId?: string) {
     .then((res) => res.data.data)
 }
 
+export function createDepartment(payload: { name: string; code: string }) {
+  return apiClient
+    .post<ApiResponse<Department>>('/departments', payload)
+    .then((res) => res.data.data)
+}
+
+export function createCategory(payload: { name: string; department_id?: string | null }) {
+  return apiClient.post<ApiResponse<Category>>('/categories', payload).then((res) => res.data.data)
+}
+
 export function listSlaSettings() {
   return apiClient.get<ApiResponse<SlaSetting[]>>('/sla-settings').then((res) => res.data.data)
 }
