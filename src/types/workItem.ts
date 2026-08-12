@@ -38,6 +38,12 @@ export interface Department {
   is_active: boolean
 }
 
+/** Minimal shape for dropdowns/comboboxes — see /departments/options. */
+export interface DepartmentOption {
+  id: string
+  name: string
+}
+
 export interface Branch {
   id: string
   name: string

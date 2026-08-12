@@ -16,3 +16,10 @@ export interface User {
   created_at: string
   abilities?: UserAbilities
 }
+
+/** Minimal shape for the "Assigned To" dropdown/combobox — see /users/me/assignable. */
+export interface UserOption {
+  id: string
+  name: string
+  department_id: string | null
+}

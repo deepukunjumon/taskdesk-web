@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/ui/combobox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useAssignableUsers, useDepartments } from '@/features/work-register/hooks'
+import { useAssignableUsers, useDepartmentOptions } from '@/features/work-register/hooks'
 import {
   ENTRY_TYPES,
   FILTERABLE_STATUSES,
@@ -26,11 +28,21 @@ export function WorkItemFiltersBar({
   showDepartmentFilter = false,
   showAssigneeFilter = false,
 }: WorkItemFiltersBarProps) {
-  const { data: departments } = useDepartments(showDepartmentFilter)
+  const [departmentQuery, setDepartmentQuery] = useState('')
+  const [assigneeQuery, setAssigneeQuery] = useState('')
+
+  const { data: departments, isLoading: departmentsLoading } = useDepartmentOptions(
+    showDepartmentFilter,
+    departmentQuery,
+  )
   // Scoped per actor — self + hierarchy descendants for a plain manager,
   // everyone for admin/superadmin — same endpoint the assign-to dropdown
   // uses, so this filter never needs the admin-only /users endpoint.
-  const { data: assignableUsers } = useAssignableUsers(showAssigneeFilter)
+  const { data: assignableUsers, isLoading: assignableUsersLoading } = useAssignableUsers(
+    showAssigneeFilter,
+    undefined,
+    assigneeQuery,
+  )
 
   function set<K extends keyof WorkItemFilters>(key: K, value: WorkItemFilters[K] | undefined) {
     onChange({ ...filters, [key]: value, page: 1 })
@@ -113,44 +125,36 @@ export function WorkItemFiltersBar({
       {showDepartmentFilter && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">Department</label>
-          <Select
+          <Combobox
+            className="w-44"
             value={filters.department_id ?? ALL}
             onValueChange={(v) => set('department_id', v === ALL ? undefined : v)}
-          >
-            <SelectTrigger className="w-44">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All</SelectItem>
-              {departments?.map((dept) => (
-                <SelectItem key={dept.id} value={dept.id}>
-                  {dept.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onSearchChange={setDepartmentQuery}
+            isLoading={departmentsLoading}
+            searchPlaceholder="Search departments..."
+            options={[
+              { value: ALL, label: 'All' },
+              ...(departments ?? []).map((dept) => ({ value: dept.id, label: dept.name })),
+            ]}
+          />
         </div>
       )}
 
       {showAssigneeFilter && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">Assigned to</label>
-          <Select
+          <Combobox
+            className="w-44"
             value={filters.assigned_to_id ?? ALL}
             onValueChange={(v) => set('assigned_to_id', v === ALL ? undefined : v)}
-          >
-            <SelectTrigger className="w-44">
-              <SelectValue placeholder="Anyone" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Anyone</SelectItem>
-              {assignableUsers?.map((user) => (
-                <SelectItem key={user.id} value={user.id}>
-                  {user.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            onSearchChange={setAssigneeQuery}
+            isLoading={assignableUsersLoading}
+            searchPlaceholder="Search people..."
+            options={[
+              { value: ALL, label: 'Anyone' },
+              ...(assignableUsers ?? []).map((user) => ({ value: user.id, label: user.name })),
+            ]}
+          />
         </div>
       )}
 

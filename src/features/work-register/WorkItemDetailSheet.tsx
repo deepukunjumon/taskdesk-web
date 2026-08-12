@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { StatusBadge } from '@/features/work-register/StatusBadge'
 import { PriorityBadge } from '@/features/work-register/PriorityBadge'
 import { StatusTransitionControl } from '@/features/work-register/StatusTransitionControl'
@@ -276,7 +276,8 @@ function StatusUpdateControl({ item }: { item: WorkItem }) {
 }
 
 function ReassignControl({ item }: { item: WorkItem }) {
-  const { data: assignableUsers } = useAssignableUsers()
+  const [query, setQuery] = useState('')
+  const { data: assignableUsers, isLoading } = useAssignableUsers(true, undefined, query)
   const [selectedUserId, setSelectedUserId] = useState('')
   const mutation = useReassignWorkItem(item.id)
 
@@ -284,18 +285,15 @@ function ReassignControl({ item }: { item: WorkItem }) {
 
   return (
     <div className="flex gap-2">
-      <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select new assignee" />
-        </SelectTrigger>
-        <SelectContent>
-          {candidates?.map((candidate) => (
-            <SelectItem key={candidate.id} value={candidate.id}>
-              {candidate.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Combobox
+        value={selectedUserId}
+        onValueChange={setSelectedUserId}
+        onSearchChange={setQuery}
+        isLoading={isLoading}
+        placeholder="Select new assignee"
+        searchPlaceholder="Search people..."
+        options={(candidates ?? []).map((candidate) => ({ value: candidate.id, label: candidate.name }))}
+      />
       <Button
         size="sm"
         disabled={!selectedUserId || mutation.isPending}

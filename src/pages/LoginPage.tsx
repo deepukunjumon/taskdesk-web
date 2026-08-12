@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Footer } from '@/components/layout/Footer'
 import { useAuthStore } from '@/stores/authStore'
+import packageJson from '../../package.json'
 
 export function LoginPage() {
   const token = useAuthStore((state) => state.token)
@@ -68,7 +69,7 @@ export function LoginPage() {
         </div>
 
         <p className="relative text-sm text-primary-foreground/50">
-          &copy; {new Date().getFullYear()} TaskDesk
+          TaskDesk v{packageJson.version} &copy; {new Date().getFullYear()}
         </p>
       </div>
 

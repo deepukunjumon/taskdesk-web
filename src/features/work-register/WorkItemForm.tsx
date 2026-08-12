@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -19,7 +20,7 @@ import {
   useAssignableUsers,
   useBranches,
   useCategories,
-  useDepartments,
+  useDepartmentOptions,
 } from '@/features/work-register/hooks'
 import { useAuthStore } from '@/stores/authStore'
 import { ENTRY_TYPES, PRIORITIES, PRIORITY_LABELS, SOURCES } from '@/types'
@@ -68,25 +69,33 @@ export function WorkItemForm({
   const user = useAuthStore((state) => state.user)
   const isManager = user ? user.roles.every((role) => role === 'user') : false
 
-  const { data: departments, isLoading: departmentsLoading } = useDepartments(!hideDepartmentField)
+  const [departmentQuery, setDepartmentQuery] = useState('')
+  const [assigneeQuery, setAssigneeQuery] = useState('')
+
+  const { data: departmentOptionsRaw, isLoading: departmentsLoading } = useDepartmentOptions(
+    !hideDepartmentField,
+    departmentQuery,
+  )
   const { data: branches, isLoading: branchesLoading } = useBranches()
   const { data: categories } = useCategories(departmentId || undefined)
   // Unscoped — used only to derive which departments this actor actually has
   // a report in, so the Department dropdown never offers one they don't.
   const { data: allAssignableUsers } = useAssignableUsers(!assignToSelf && isManager)
-  // Rescoped to the chosen department — backs the "Assigned To" options, so
-  // it only ever lists people the backend would actually allow as a target.
+  // Rescoped to the chosen department (and the current search) — backs the
+  // "Assigned To" options, so it only ever lists people the backend would
+  // actually allow as a target.
   const { data: assignableUsers, isLoading: usersLoading } = useAssignableUsers(
     !assignToSelf && !!departmentId,
     departmentId || undefined,
+    assigneeQuery,
   )
 
   const allowedDepartmentIds = isManager
     ? new Set((allAssignableUsers ?? []).map((u) => u.department_id).filter((id): id is string => !!id))
     : null
   const departmentOptions = allowedDepartmentIds
-    ? (departments ?? []).filter((dept) => allowedDepartmentIds.has(dept.id))
-    : departments
+    ? (departmentOptionsRaw ?? []).filter((dept) => allowedDepartmentIds.has(dept.id))
+    : departmentOptionsRaw
 
   useEffect(() => {
     if (!assignToSelf) {
@@ -140,20 +149,20 @@ export function WorkItemForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Department</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {departmentOptions?.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Combobox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onSearchChange={setDepartmentQuery}
+                    isLoading={departmentsLoading}
+                    options={(departmentOptions ?? []).map((dept) => ({
+                      value: dept.id,
+                      label: dept.name,
+                    }))}
+                    placeholder="Select department"
+                    searchPlaceholder="Search departments..."
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -167,32 +176,21 @@ export function WorkItemForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Assigned To</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!departmentId || usersLoading}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue
-                        placeholder={
-                          !departmentId
-                            ? 'Select a department first'
-                            : usersLoading
-                              ? 'Loading assignees...'
-                              : 'Select assignee'
-                        }
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {assignableUsers?.map((assignee) => (
-                      <SelectItem key={assignee.id} value={assignee.id}>
-                        {assignee.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Combobox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onSearchChange={setAssigneeQuery}
+                    isLoading={usersLoading}
+                    disabled={!departmentId}
+                    options={(assignableUsers ?? []).map((assignee) => ({
+                      value: assignee.id,
+                      label: assignee.name,
+                    }))}
+                    placeholder={!departmentId ? 'Select a department first' : 'Select assignee'}
+                    searchPlaceholder="Search people..."
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

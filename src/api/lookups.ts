@@ -5,14 +5,31 @@ import type {
   BranchType,
   Category,
   Department,
+  DepartmentOption,
   SlaSetting,
   User,
+  UserOption,
 } from '@/types'
 
 export function listDepartments(includeInactive: boolean = false) {
   return apiClient
     .get<ApiResponse<Department[]>>('/departments', {
       params: includeInactive ? { include_inactive: 1 } : undefined,
+    })
+    .then((res) => res.data.data)
+}
+
+/**
+ * Minimal, active-only lookup for dropdowns/comboboxes (id + name) —
+ * cheaper than listDepartments() and supports a `q` name search. Use this
+ * everywhere a form just needs to let someone pick a department; reserve
+ * listDepartments() for the admin management screen, which needs
+ * code/is_active too.
+ */
+export function listDepartmentOptions(q?: string) {
+  return apiClient
+    .get<ApiResponse<DepartmentOption[]>>('/departments/options', {
+      params: q ? { q } : undefined,
     })
     .then((res) => res.data.data)
 }
@@ -110,14 +127,16 @@ export function listUsers() {
 }
 
 /**
- * The actor's own record plus everyone they're allowed to assign a task to.
- * Passing `departmentId` narrows the result to that department, matching
- * the backend's department-scoped assignment check.
+ * The actor's own record plus everyone they're allowed to assign a task to,
+ * in the minimal UserOption shape (id, name, department_id) — this endpoint
+ * only ever backs a dropdown/combobox. Passing `departmentId` narrows the
+ * result to that department, matching the backend's department-scoped
+ * assignment check; passing `q` narrows it further to a name search.
  */
-export function listAssignableUsers(departmentId?: string) {
+export function listAssignableUsers(departmentId?: string, q?: string) {
   return apiClient
-    .get<ApiResponse<User[]>>('/users/me/assignable', {
-      params: departmentId ? { department_id: departmentId } : undefined,
+    .get<ApiResponse<UserOption[]>>('/users/me/assignable', {
+      params: { department_id: departmentId, q },
     })
     .then((res) => res.data.data)
 }
