@@ -3,7 +3,7 @@ import {
   CheckCircle2,
   CircleDot,
   ClipboardList,
-  Loader,
+  Loader2,
   PauseCircle,
   type LucideIcon,
 } from 'lucide-react'
@@ -21,9 +21,9 @@ interface StatDefinition {
 }
 
 const STAT_DEFINITIONS: StatDefinition[] = [
-  { key: 'total', label: 'Total', icon: ClipboardList, iconClassName: 'text-foreground' },
+  { key: 'total', label: 'Total', icon: ClipboardList, iconClassName: 'text-blue-500' },
   { key: 'open', label: 'Open', icon: CircleDot, iconClassName: 'text-blue-500' },
-  { key: 'in_progress', label: 'In Progress', icon: Loader, iconClassName: 'text-amber-500' },
+  { key: 'in_progress', label: 'In Progress', icon: Loader2, iconClassName: 'text-amber-500' },
   { key: 'pending', label: 'Pending', icon: PauseCircle, iconClassName: 'text-purple-500' },
   { key: 'closed', label: 'Closed', icon: CheckCircle2, iconClassName: 'text-emerald-500' },
   { key: 'overdue', label: 'Overdue', icon: AlertTriangle, iconClassName: 'text-red-500' },
@@ -45,14 +45,14 @@ export function StatsCards() {
       {STAT_DEFINITIONS.map(({ key, label, icon: Icon, iconClassName }) => (
         <Card key={key}>
           <CardContent className="flex items-center gap-3">
-            <Icon className={cn('size-8 shrink-0', iconClassName)} />
+            <Icon className={cn('size-6 shrink-0', iconClassName)} />
             <div className="min-w-0">
               {isLoading || !data ? (
                 <Skeleton className="h-7 w-12" />
               ) : (
                 <p className="text-2xl font-semibold tabular-nums">{data[key]}</p>
               )}
-              <p className="text-xs text-muted-foreground">{label}</p>
+              <p className="text-sm font-medium">{label}</p>
             </div>
           </CardContent>
         </Card>
