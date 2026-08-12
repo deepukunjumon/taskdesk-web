@@ -1,6 +1,17 @@
+import { useState } from 'react'
 import { Check, LogOut, Menu } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +33,7 @@ export function Header() {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
 
   return (
     <header className="flex h-14 shrink-0 items-center border-b border-border px-4 sm:px-6">
@@ -58,13 +70,33 @@ export function Header() {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
-            onClick={() => logout()}
+            onSelect={(e) => {
+              e.preventDefault()
+              setLogoutConfirmOpen(true)
+            }}
           >
             <LogOut className="size-4" />
             Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <AlertDialog open={logoutConfirmOpen} onOpenChange={setLogoutConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => logout()}>
+              Log out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   )
 }

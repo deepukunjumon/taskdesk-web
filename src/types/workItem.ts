@@ -83,6 +83,7 @@ export interface WorkItemTimelineEntry {
   action: string
   from_status: WorkItemStatus | null
   to_status: WorkItemStatus | null
+  assigned_to_name: string | null
   note: string | null
   created_at: string
 }

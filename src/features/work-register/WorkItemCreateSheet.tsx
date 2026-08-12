@@ -41,7 +41,7 @@ export function WorkItemCreateSheet({
       <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>Add New Task</SheetTitle>
-          <SheetDescription>Create a new task or support call entry.</SheetDescription>
+          <SheetDescription>Create a new task and assign it to a user.</SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-4">
           <WorkItemForm

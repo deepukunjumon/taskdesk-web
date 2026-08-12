@@ -68,6 +68,11 @@ function WorkItemDetailContent({ item, onClose }: { item: WorkItem; onClose: () 
           <PriorityBadge priority={item.priority} />
         </div>
         <SheetDescription>{item.subject}</SheetDescription>
+        
+        <div>
+          <p className="mb-1 text-xs font-medium text-muted-foreground">Description</p>
+          <p className="text-sm whitespace-pre-wrap">{item.description}</p>
+        </div>
 
         {(showEdit || showDelete) && (
           <div className="flex gap-2 pt-1">
@@ -144,11 +149,6 @@ function WorkItemDetailContent({ item, onClose }: { item: WorkItem; onClose: () 
           />
         </dl>
 
-        <div>
-          <p className="mb-1 text-xs font-medium text-muted-foreground">Description</p>
-          <p className="text-sm whitespace-pre-wrap">{item.description}</p>
-        </div>
-
         {item.resolution && (
           <div>
             <p className="mb-1 text-xs font-medium text-muted-foreground">Resolution</p>
@@ -163,7 +163,7 @@ function WorkItemDetailContent({ item, onClose }: { item: WorkItem; onClose: () 
           </div>
         )}
 
-        <Separator />
+        {item.permissions?.can_update_status && item.next_statuses.length > 0 && <Separator />}
 
         {item.permissions?.can_update_status && (
           <div className="space-y-2">
@@ -338,7 +338,9 @@ function TimelineFeed({ entries }: { entries: WorkItem['timeline'] }) {
 
 function describeAction(entry: NonNullable<WorkItem['timeline']>[number]): string {
   if (entry.action === 'created') return 'created this task'
-  if (entry.action === 'reassigned') return 'reassigned this task'
+  if (entry.action === 'reassigned') {
+    return entry.assigned_to_name ? `reassigned this task to ${entry.assigned_to_name}` : 'reassigned this task'
+  }
   if (entry.action === 'deleted') return 'deleted this task'
   if (entry.action === 'status_changed' && entry.from_status && entry.to_status) {
     return `changed status from ${STATUS_LABELS[entry.from_status]} to ${STATUS_LABELS[entry.to_status]}`
