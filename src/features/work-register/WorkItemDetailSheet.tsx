@@ -202,7 +202,7 @@ function Field({
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className={capitalize ? 'capitalize' : undefined}>{value ?? '—'}</dd>
+      <dd className={capitalize ? 'capitalize' : undefined}>{value ?? ''}</dd>
     </div>
   )
 }
@@ -321,7 +321,7 @@ function TimelineFeed({ entries }: { entries: WorkItem['timeline'] }) {
     <ol className="space-y-3 border-l pl-4">
       {entries.map((entry) => (
         <li key={entry.id} className="relative">
-          <span className="absolute -left-[21px] top-1 size-2 rounded-full bg-primary" />
+          <span className="absolute -left-[21px] top-1 size-2 rounded-full bg-green-600" />
           <p className="text-sm">
             <span className="font-medium">{entry.actor?.name ?? 'System'}</span>{' '}
             {describeAction(entry)}

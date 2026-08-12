@@ -116,15 +116,23 @@ export function Sidebar() {
   const user = useAuthStore((state) => state.user)
   const isOpen = useUiStore((state) => state.isSidebarOpen)
   const toggleSidebar = useUiStore((state) => state.toggleSidebar)
+  const openSidebar = useUiStore((state) => state.openSidebar)
   const closeSidebar = useUiStore((state) => state.closeSidebar)
   const location = useLocation()
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set())
 
   const visibleItems = user ? NAV_ITEMS.filter((item) => isItemVisible(item, user)) : []
 
-  function handleNavClick() {
+  function handleNavClick(groupLabel?: string) {
     if (window.innerWidth < SIDEBAR_MOBILE_BREAKPOINT) {
       closeSidebar()
+      return
+    }
+    if (!isOpen) {
+      openSidebar()
+      if (groupLabel) {
+        setExpandedGroups((prev) => new Set(prev).add(groupLabel))
+      }
     }
   }
 
@@ -187,7 +195,7 @@ export function Sidebar() {
                 <NavLink
                   key={item.label}
                   to={children[0].to}
-                  onClick={handleNavClick}
+                  onClick={() => handleNavClick(item.label)}
                   title={item.label}
                   className={cn(
                     'flex items-center justify-center gap-3 rounded-md px-0 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',

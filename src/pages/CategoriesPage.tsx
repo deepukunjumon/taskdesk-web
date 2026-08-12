@@ -33,7 +33,7 @@ function CategoryRow({
       <TableRow>
         <TableCell className="font-medium">{category.name}</TableCell>
         <TableCell>
-          {category.department_id ? (departmentsById.get(category.department_id)?.name ?? '—') : '—'}
+          {category.department_id ? (departmentsById.get(category.department_id)?.name ?? '') : ''}
         </TableCell>
         <TableCell>
           <Badge variant={category.is_active ? 'default' : 'secondary'}>
