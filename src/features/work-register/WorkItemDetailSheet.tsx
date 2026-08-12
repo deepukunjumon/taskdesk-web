@@ -63,7 +63,7 @@ function WorkItemDetailContent({ item, onClose }: { item: WorkItem; onClose: () 
     <div className="flex flex-col">
       <SheetHeader>
         <div className="flex items-center gap-2">
-          <SheetTitle>{item.work_id}</SheetTitle>
+          <SheetTitle>{item.task_id}</SheetTitle>
           <StatusBadge status={item.status} />
           <PriorityBadge priority={item.priority} />
         </div>
@@ -94,7 +94,7 @@ function WorkItemDetailContent({ item, onClose }: { item: WorkItem; onClose: () 
         {isConfirmingDelete && (
           <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 p-3">
             <p className="text-sm">
-              Are you sure you want to delete <strong>{item.work_id}</strong>?
+              Are you sure you want to delete <strong>{item.task_id}</strong>?
             </p>
             <div className="flex gap-2">
               <Button

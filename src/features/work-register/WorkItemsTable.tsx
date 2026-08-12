@@ -98,7 +98,7 @@ export function WorkItemsTable({
               >
                 <TableCell>{startIndex + index + 1}</TableCell>
                 <TableCell>{format(new Date(item.created_at), 'dd MMM yyyy')}</TableCell>
-                <TableCell className="font-medium">{item.work_id}</TableCell>
+                <TableCell className="font-medium">{item.task_id}</TableCell>
                 <TableCell className="capitalize">{item.entry_type.replace('_', ' ')}</TableCell>
                 <TableCell>{item.assigned_by?.name ?? '—'}</TableCell>
                 {showAssigneeColumn && <TableCell>{item.assigned_to?.name ?? '—'}</TableCell>}

@@ -89,7 +89,7 @@ export interface WorkItemTimelineEntry {
 
 export interface WorkItem {
   id: string
-  work_id: string
+  task_id: string
   department: Department | null
   entry_type: EntryType
   assigned_by: { id: string; name: string } | null
@@ -127,7 +127,7 @@ export interface WorkItemFilters {
   category_id?: string
   date_from?: string
   date_to?: string
-  sort_by?: 'created_at' | 'priority' | 'status' | 'work_id'
+  sort_by?: 'created_at' | 'priority' | 'status' | 'task_id'
   sort_dir?: 'asc' | 'desc'
   page?: number
   per_page?: number
