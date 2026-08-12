@@ -81,14 +81,11 @@ export function deleteBranch(id: string) {
   return apiClient.delete<{ success: boolean }>(`/branches/${id}`).then((res) => res.data)
 }
 
-export function createCategory(payload: { name: string; department_id?: string | null }) {
+export function createCategory(payload: { name: string; department_ids?: string[] }) {
   return apiClient.post<ApiResponse<Category>>('/categories', payload).then((res) => res.data.data)
 }
 
-export function updateCategory(
-  id: string,
-  payload: { name?: string; department_id?: string | null },
-) {
+export function updateCategory(id: string, payload: { name?: string; department_ids?: string[] }) {
   return apiClient
     .patch<ApiResponse<Category>>(`/categories/${id}`, payload)
     .then((res) => res.data.data)

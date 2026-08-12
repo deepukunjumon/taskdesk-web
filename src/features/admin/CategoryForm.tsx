@@ -11,11 +11,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { categoryFormSchema, type CategoryFormValues } from '@/features/admin/schema'
 import { useDepartments } from '@/features/work-register/hooks'
-
-const NO_DEPARTMENT = '__none__'
 
 interface CategoryFormProps {
   onSubmit: (values: CategoryFormValues) => void
@@ -28,7 +25,7 @@ export function CategoryForm({ onSubmit, isSubmitting, defaultValues }: Category
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
-    defaultValues: defaultValues ?? { name: '', department_id: '' },
+    defaultValues: defaultValues ?? { name: '', department_ids: [] },
   })
 
   if (departmentsLoading) {
@@ -60,28 +57,43 @@ export function CategoryForm({ onSubmit, isSubmitting, defaultValues }: Category
 
         <FormField
           control={form.control}
-          name="department_id"
+          name="department_ids"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Department</FormLabel>
-              <Select
-                onValueChange={(v) => field.onChange(v === NO_DEPARTMENT ? '' : v)}
-                value={field.value || NO_DEPARTMENT}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="No department" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value={NO_DEPARTMENT}>No department</SelectItem>
-                  {departments?.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Departments</FormLabel>
+              <p className="text-xs text-muted-foreground">
+                Leave every department unchecked to make this category common — available
+                regardless of which department is selected.
+              </p>
+              <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border p-3">
+                {departments?.length ? (
+                  departments.map((dept) => {
+                    const checked = field.value.includes(dept.id)
+                    return (
+                      <label
+                        key={dept.id}
+                        className="flex items-center gap-2 text-sm font-normal"
+                      >
+                        <input
+                          type="checkbox"
+                          className="size-4 rounded border-input accent-primary"
+                          checked={checked}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.checked
+                                ? [...field.value, dept.id]
+                                : field.value.filter((id) => id !== dept.id),
+                            )
+                          }
+                        />
+                        {dept.name}
+                      </label>
+                    )
+                  })
+                ) : (
+                  <p className="text-sm text-muted-foreground">No departments yet.</p>
+                )}
+              </div>
               <FormMessage />
             </FormItem>
           )}

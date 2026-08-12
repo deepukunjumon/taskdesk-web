@@ -19,7 +19,7 @@ export function CategoryCreateSheet({ open, onOpenChange }: CategoryCreateSheetP
 
   function handleSubmit(values: CategoryFormValues) {
     mutation.mutate(
-      { name: values.name, department_id: values.department_id || null },
+      { name: values.name, department_ids: values.department_ids },
       { onSuccess: () => onOpenChange(false) },
     )
   }

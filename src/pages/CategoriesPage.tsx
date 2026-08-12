@@ -13,16 +13,9 @@ import {
 import { CategoryCreateSheet } from '@/features/admin/CategoryCreateSheet'
 import { CategoryEditSheet } from '@/features/admin/CategoryEditSheet'
 import { useAdminCategories, useDeleteCategory, useToggleCategoryActive } from '@/features/admin/hooks'
-import { useDepartments } from '@/features/work-register/hooks'
-import type { Category, Department } from '@/types'
+import type { Category } from '@/types'
 
-function CategoryRow({
-  category,
-  departmentsById,
-}: {
-  category: Category
-  departmentsById: Map<string, Department>
-}) {
+function CategoryRow({ category }: { category: Category }) {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
   const toggleMutation = useToggleCategoryActive(category.id)
@@ -33,7 +26,11 @@ function CategoryRow({
       <TableRow>
         <TableCell className="font-medium">{category.name}</TableCell>
         <TableCell>
-          {category.department_id ? (departmentsById.get(category.department_id)?.name ?? '') : ''}
+          {category.department_names.length ? (
+            category.department_names.join(', ')
+          ) : (
+            <span className="text-muted-foreground">All departments</span>
+          )}
         </TableCell>
         <TableCell>
           <Badge variant={category.is_active ? 'default' : 'secondary'}>
@@ -87,11 +84,8 @@ function CategoryRow({
 }
 
 export function CategoriesPage() {
-  const { data: departments } = useDepartments()
   const { data: categories, isLoading, isError } = useAdminCategories()
   const [createOpen, setCreateOpen] = useState(false)
-
-  const departmentsById = new Map((departments ?? []).map((dept) => [dept.id, dept]))
 
   return (
     <div className="space-y-6">
@@ -99,7 +93,7 @@ export function CategoriesPage() {
         <div>
           <h1 className="text-2xl font-semibold">Categories</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Categories optionally belong to a department and classify tasks within it.
+            Categories can belong to one or more departments — or none, to apply everywhere.
           </p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>Add Category</Button>
@@ -132,9 +126,7 @@ export function CategoriesPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                categories.map((category) => (
-                  <CategoryRow key={category.id} category={category} departmentsById={departmentsById} />
-                ))
+                categories.map((category) => <CategoryRow key={category.id} category={category} />)
               )}
             </TableBody>
           </Table>

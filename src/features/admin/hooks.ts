@@ -182,7 +182,7 @@ export function useCreateCategory() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (payload: { name: string; department_id?: string | null }) =>
+    mutationFn: (payload: { name: string; department_ids?: string[] }) =>
       lookupsApi.createCategory(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
@@ -198,7 +198,7 @@ export function useUpdateCategory(id: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (payload: { name?: string; department_id?: string | null }) =>
+    mutationFn: (payload: { name?: string; department_ids?: string[] }) =>
       lookupsApi.updateCategory(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })

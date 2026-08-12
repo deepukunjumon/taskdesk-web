@@ -49,7 +49,9 @@ export interface Branch {
 export interface Category {
   id: string
   name: string
-  department_id: string | null
+  /** Empty means "common" — applies regardless of which department is selected. */
+  department_ids: string[]
+  department_names: string[]
   is_active: boolean
 }
 

@@ -21,7 +21,7 @@ export function CategoryEditSheet({ category, open, onOpenChange }: CategoryEdit
 
   function handleSubmit(values: CategoryFormValues) {
     mutation.mutate(
-      { name: values.name, department_id: values.department_id || null },
+      { name: values.name, department_ids: values.department_ids },
       { onSuccess: () => onOpenChange(false) },
     )
   }
@@ -37,7 +37,7 @@ export function CategoryEditSheet({ category, open, onOpenChange }: CategoryEdit
           <CategoryForm
             onSubmit={handleSubmit}
             isSubmitting={mutation.isPending}
-            defaultValues={{ name: category.name, department_id: category.department_id ?? '' }}
+            defaultValues={{ name: category.name, department_ids: category.department_ids }}
           />
         </div>
       </SheetContent>

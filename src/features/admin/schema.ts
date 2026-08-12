@@ -18,8 +18,8 @@ export type BranchFormValues = z.infer<typeof branchFormSchema>
 
 export const categoryFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
-  // Blank means "no department" — the backend column is nullable.
-  department_id: z.string().uuid().optional().or(z.literal('')),
+  // Empty means "common" — applies regardless of which department is selected.
+  department_ids: z.array(z.string().uuid()),
 })
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>
