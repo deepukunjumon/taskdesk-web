@@ -1,10 +1,9 @@
 import { type FormEvent, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, LayoutGrid } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Footer } from '@/components/layout/Footer'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -39,13 +38,55 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-muted/30">
-      <div className="flex flex-1 items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>Sign in to TaskDesk</CardTitle>
-          </CardHeader>
-          <CardContent>
+    <div className="grid min-h-svh lg:grid-cols-2">
+      {/* Left — branding panel, hidden below lg */}
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-primary-foreground lg:flex">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+
+        <div className="relative flex items-center gap-2.5">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground/10">
+            <LayoutGrid className="size-4.5" />
+          </div>
+          <span className="text-lg font-semibold tracking-tight">TaskDesk</span>
+        </div>
+
+        <div className="relative max-w-md space-y-3">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance">
+            Keep every task moving, on time.
+          </h2>
+          <p className="text-primary-foreground/70">
+            Assign work across your team, track status end to end, and stay ahead of SLAs — all
+            in one place.
+          </p>
+        </div>
+
+        <p className="relative text-sm text-primary-foreground/50">
+          &copy; {new Date().getFullYear()} TaskDesk
+        </p>
+      </div>
+
+      {/* Right — form */}
+      <div className="flex flex-col bg-background">
+        <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
+          <div className="w-full max-w-sm">
+            <div className="mb-8 flex flex-col gap-3 lg:hidden">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <LayoutGrid className="size-4.5" />
+              </div>
+            </div>
+
+            <div className="mb-8 space-y-1.5">
+              <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+              <p className="text-sm text-muted-foreground">Sign in to your TaskDesk account</p>
+            </div>
+
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="email" className="text-sm font-medium">
@@ -55,7 +96,9 @@ export function LoginPage() {
                   id="email"
                   type="email"
                   autoComplete="email"
+                  placeholder="you@company.com"
                   required
+                  className="h-10"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -69,8 +112,9 @@ export function LoginPage() {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
+                    placeholder="••••••••"
                     required
-                    className="pr-9"
+                    className="h-10 pr-9"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -78,21 +122,23 @@ export function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground hover:text-foreground"
+                    className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
               </div>
-              <Button type="submit" disabled={isSubmitting} className="mt-2">
+              <Button type="submit" disabled={isSubmitting} className="mt-2 h-10">
                 {isSubmitting ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
 
-      <Footer />
+        <div className="lg:hidden">
+          <Footer />
+        </div>
+      </div>
     </div>
   )
 }
