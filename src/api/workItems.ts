@@ -9,9 +9,31 @@ import type {
   WorkItemStatus,
 } from '@/types'
 
+/**
+ * The backend takes multi-value filters (status, priority, entry_type,
+ * department_id, assigned_to_id) as a comma-separated string rather than
+ * PHP's array query-string syntax — simpler than getting axios to serialize
+ * arrays a specific way, and avoids ever sending an empty array as a filter.
+ */
+function serializeFilters(filters: WorkItemFilters): Record<string, string | number | undefined> {
+  const params: Record<string, string | number | undefined> = {}
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (Array.isArray(value)) {
+      if (value.length > 0) {
+        params[key] = value.join(',')
+      }
+    } else if (value !== undefined) {
+      params[key] = value
+    }
+  }
+
+  return params
+}
+
 export function listWorkItems(filters: WorkItemFilters = {}) {
   return apiClient
-    .get<PaginatedResponse<WorkItem>>('/work-items', { params: filters })
+    .get<PaginatedResponse<WorkItem>>('/work-items', { params: serializeFilters(filters) })
     .then((res) => res.data)
 }
 

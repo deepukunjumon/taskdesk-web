@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Combobox } from '@/components/ui/combobox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { MultiCombobox } from '@/components/ui/multi-combobox'
 import { useAssignableUsers, useDepartmentOptions } from '@/features/work-register/hooks'
 import { useAuthStore } from '@/stores/authStore'
 import {
@@ -11,7 +10,10 @@ import {
   PRIORITIES,
   PRIORITY_LABELS,
   STATUS_LABELS,
+  type EntryType,
+  type Priority,
   type WorkItemFilters,
+  type WorkItemStatus,
 } from '@/types'
 
 interface WorkItemFiltersBarProps {
@@ -21,7 +23,10 @@ interface WorkItemFiltersBarProps {
   showAssigneeFilter?: boolean
 }
 
-const ALL = '__all__'
+const ENTRY_TYPE_LABELS: Record<EntryType, string> = {
+  task: 'Task',
+  support_call: 'Support Call',
+}
 
 export function WorkItemFiltersBar({
   filters,
@@ -65,94 +70,70 @@ export function WorkItemFiltersBar({
     onChange({ ...filters, [key]: value, page: 1 })
   }
 
+  function setMulti<K extends 'status' | 'priority' | 'entry_type' | 'department_id' | 'assigned_to_id'>(
+    key: K,
+    values: string[],
+  ) {
+    set(key, (values.length > 0 ? values : undefined) as WorkItemFilters[K])
+  }
+
   function clearAll() {
     onChange({ page: 1, per_page: filters.per_page })
   }
 
   const hasActiveFilters = Object.entries(filters).some(
-    ([key, value]) => !['page', 'per_page', 'sort_by', 'sort_dir'].includes(key) && Boolean(value),
+    ([key, value]) =>
+      !['page', 'per_page', 'sort_by', 'sort_dir'].includes(key) &&
+      (Array.isArray(value) ? value.length > 0 : Boolean(value)),
   )
 
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-muted-foreground">Status</label>
-        <Select
-          value={filters.status ?? ALL}
-          onValueChange={(v) => set('status', v === ALL ? undefined : (v as WorkItemFilters['status']))}
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All</SelectItem>
-            {FILTERABLE_STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {STATUS_LABELS[status]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiCombobox
+          className="w-40"
+          value={filters.status ?? []}
+          onValueChange={(values) => setMulti('status', values as WorkItemStatus[])}
+          placeholder="All"
+          options={FILTERABLE_STATUSES.map((status) => ({ value: status, label: STATUS_LABELS[status] }))}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-muted-foreground">Priority</label>
-        <Select
-          value={filters.priority ?? ALL}
-          onValueChange={(v) =>
-            set('priority', v === ALL ? undefined : (v as WorkItemFilters['priority']))
-          }
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All</SelectItem>
-            {PRIORITIES.map((priority) => (
-              <SelectItem key={priority} value={priority}>
-                {PRIORITY_LABELS[priority]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiCombobox
+          className="w-40"
+          value={filters.priority ?? []}
+          onValueChange={(values) => setMulti('priority', values as Priority[])}
+          placeholder="All"
+          options={PRIORITIES.map((priority) => ({ value: priority, label: PRIORITY_LABELS[priority] }))}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-muted-foreground">Entry type</label>
-        <Select
-          value={filters.entry_type ?? ALL}
-          onValueChange={(v) =>
-            set('entry_type', v === ALL ? undefined : (v as WorkItemFilters['entry_type']))
-          }
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="All" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>All</SelectItem>
-            {ENTRY_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type === 'task' ? 'Task' : 'Support Call'}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiCombobox
+          className="w-40"
+          value={filters.entry_type ?? []}
+          onValueChange={(values) => setMulti('entry_type', values as EntryType[])}
+          placeholder="All"
+          options={ENTRY_TYPES.map((type) => ({ value: type, label: ENTRY_TYPE_LABELS[type] }))}
+        />
       </div>
 
       {showDepartmentFilter && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">Department</label>
-          <Combobox
+          <MultiCombobox
             className="w-44"
-            value={filters.department_id ?? ALL}
-            onValueChange={(v) => set('department_id', v === ALL ? undefined : v)}
+            value={filters.department_id ?? []}
+            onValueChange={(values) => setMulti('department_id', values)}
             onSearchChange={setDepartmentQuery}
             isLoading={departmentsLoading}
+            placeholder="All"
             searchPlaceholder="Search departments..."
-            options={[
-              { value: ALL, label: 'All' },
-              ...(departmentOptions ?? []).map((dept) => ({ value: dept.id, label: dept.name })),
-            ]}
+            options={(departmentOptions ?? []).map((dept) => ({ value: dept.id, label: dept.name }))}
           />
         </div>
       )}
@@ -160,17 +141,15 @@ export function WorkItemFiltersBar({
       {showAssigneeFilter && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">Assigned to</label>
-          <Combobox
+          <MultiCombobox
             className="w-44"
-            value={filters.assigned_to_id ?? ALL}
-            onValueChange={(v) => set('assigned_to_id', v === ALL ? undefined : v)}
+            value={filters.assigned_to_id ?? []}
+            onValueChange={(values) => setMulti('assigned_to_id', values)}
             onSearchChange={setAssigneeQuery}
             isLoading={assignableUsersLoading}
+            placeholder="Anyone"
             searchPlaceholder="Search people..."
-            options={[
-              { value: ALL, label: 'Anyone' },
-              ...(assignableUsers ?? []).map((user) => ({ value: user.id, label: user.name })),
-            ]}
+            options={(assignableUsers ?? []).map((user) => ({ value: user.id, label: user.name }))}
           />
         </div>
       )}

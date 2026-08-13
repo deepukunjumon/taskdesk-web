@@ -16,7 +16,7 @@ export function MyTasksPage() {
 
   const { data, isLoading, isError } = useWorkItems({
     ...filters,
-    assigned_to_id: user?.id,
+    assigned_to_id: user?.id ? [user.id] : undefined,
   })
 
   // Managers and admin/superadmin already have the full Task Register for

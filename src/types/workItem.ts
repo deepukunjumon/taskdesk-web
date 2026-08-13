@@ -127,11 +127,11 @@ export interface WorkItem {
 }
 
 export interface WorkItemFilters {
-  status?: WorkItemStatus
-  priority?: Priority
-  department_id?: string
-  assigned_to_id?: string
-  entry_type?: EntryType
+  status?: WorkItemStatus[]
+  priority?: Priority[]
+  department_id?: string[]
+  assigned_to_id?: string[]
+  entry_type?: EntryType[]
   branch_id?: string
   category_id?: string
   date_from?: string
