@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -9,111 +10,136 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useUpdateUserManager } from '@/features/admin/hooks'
-import { useUsers } from '@/features/work-register/hooks'
-import type { User } from '@/types'
+import { TablePagination } from '@/features/work-register/TablePagination'
+import { UserEditSheet } from '@/features/admin/UserEditSheet'
+import { UserRelieveDialog } from '@/features/admin/UserRelieveDialog'
+import { UserFiltersBar } from '@/features/admin/UserFiltersBar'
+import { useAdminUsers, useUpdateUserStatus } from '@/features/admin/hooks'
+import type { AdminUserFilters, User } from '@/types'
 
-const NO_MANAGER = '__none__'
+function StatusBadge({ user }: { user: User }) {
+  if (user.is_active) {
+    return <Badge variant="default">Active</Badge>
+  }
+  if (user.relieved_on) {
+    return <Badge variant="destructive">Relieved</Badge>
+  }
+  return <Badge variant="secondary">Inactive</Badge>
+}
+
+function UserRow({ user, slNo }: { user: User; slNo: number }) {
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isRelieveOpen, setIsRelieveOpen] = useState(false)
+  const statusMutation = useUpdateUserStatus(user.id)
+
+  return (
+    <>
+      <TableRow>
+        <TableCell>{slNo}</TableCell>
+        <TableCell>{user.employee_code ?? ''}</TableCell>
+        <TableCell className="font-medium">{user.name}</TableCell>
+        <TableCell className="text-muted-foreground">{user.email}</TableCell>
+        <TableCell>{user.department?.name ?? ''}</TableCell>
+        <TableCell>{user.manager?.name ?? ''}</TableCell>
+        <TableCell>
+          <StatusBadge user={user} />
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={() => setIsEditOpen(true)}>
+              Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={statusMutation.isPending}
+              onClick={() => statusMutation.mutate(!user.is_active)}
+            >
+              {user.is_active ? 'Disable' : 'Enable'}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={Boolean(user.relieved_on)}
+              className="text-destructive hover:text-destructive"
+              onClick={() => setIsRelieveOpen(true)}
+            >
+              {user.relieved_on ? 'Relieved' : 'Mark Relieved'}
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+      <UserEditSheet user={user} open={isEditOpen} onOpenChange={setIsEditOpen} />
+      <UserRelieveDialog user={user} open={isRelieveOpen} onOpenChange={setIsRelieveOpen} />
+    </>
+  )
+}
 
 export function ReportingStructurePage() {
-  const { data: users, isLoading, isError } = useUsers()
-  const mutation = useUpdateUserManager()
+  const [filters, setFilters] = useState<AdminUserFilters>({ page: 1, per_page: 15 })
+  const { data, isLoading, isError } = useAdminUsers(filters)
+  const startIndex = ((data?.meta.current_page ?? 1) - 1) * (data?.meta.per_page ?? 15)
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Reporting Structure</h1>
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-semibold">Users</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage user details, status, and each user's manager — this determines who can assign
+          tasks to them, at any depth in the chain.
+        </p>
+      </div>
+
+      <UserFiltersBar filters={filters} onChange={setFilters} />
+
+      {isError ? (
+        <p className="text-sm text-destructive">Could not load users.</p>
+      ) : isLoading && !data ? (
         <div className="space-y-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
-      </div>
-    )
-  }
+      ) : (
+        <div className="space-y-3">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Sl.No</TableHead>
+                  <TableHead>Employee Code</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Manager</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data?.data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-sm text-muted-foreground">
+                      No users found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  data?.data.map((user, index) => (
+                    <UserRow key={user.id} user={user} slNo={startIndex + index + 1} />
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-  if (isError || !users) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Reporting Structure</h1>
-        <p className="text-sm text-destructive">Could not load users.</p>
-      </div>
-    )
-  }
-
-  const usersById = new Map(users.map((u) => [u.id, u]))
-
-  function managerOptionsFor(user: User) {
-    // A user can't report to themself or to anyone already in their own
-    // descendant chain — the backend rejects cycles anyway, but filtering
-    // obviously-invalid options keeps the dropdown honest.
-    return users!.filter((candidate) => candidate.id !== user.id)
-  }
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Reporting Structure</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Set each user's manager. This determines who can assign tasks to them, at any depth in
-          the chain.
-        </p>
-      </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Manager</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                <TableCell>
-                  {user.roles.map((role) => (
-                    <Badge key={role} variant="secondary" className="capitalize">
-                      {role}
-                    </Badge>
-                  ))}
-                </TableCell>
-                <TableCell>
-                  <Select
-                    value={user.manager_id ?? NO_MANAGER}
-                    onValueChange={(value) =>
-                      mutation.mutate({
-                        userId: user.id,
-                        managerId: value === NO_MANAGER ? null : value,
-                      })
-                    }
-                    disabled={mutation.isPending}
-                  >
-                    <SelectTrigger className="w-56">
-                      <SelectValue placeholder="No manager" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NO_MANAGER}>No manager</SelectItem>
-                      {managerOptionsFor(user).map((candidate) => (
-                        <SelectItem key={candidate.id} value={candidate.id}>
-                          {candidate.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {user.manager_id && !usersById.has(user.manager_id) && (
-                    <p className="mt-1 text-xs text-muted-foreground">Manager not visible</p>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          {data && (
+            <TablePagination
+              meta={data.meta}
+              onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
+            />
+          )}
+        </div>
+      )}
     </div>
   )
 }

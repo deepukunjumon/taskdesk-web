@@ -55,11 +55,6 @@ export function useCategories(departmentId?: string) {
   })
 }
 
-/** `GET /users` is admin/superadmin-only on the backend — always pass `enabled`. */
-export function useUsers(enabled: boolean = true) {
-  return useQuery({ queryKey: ['users'], queryFn: lookupsApi.listUsers, enabled })
-}
-
 /**
  * Scoped per the current actor — self + descendants, or everyone for
  * admin/superadmin. Passing `departmentId` narrows it to that department,

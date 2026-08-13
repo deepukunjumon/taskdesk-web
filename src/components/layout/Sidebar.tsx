@@ -89,7 +89,7 @@ const NAV_ITEMS: NavEntry[] = [
   },
   {
     type: 'link',
-    label: 'Reporting Structure',
+    label: 'Users',
     to: '/admin/reporting-structure',
     roles: ['superadmin', 'admin'],
     icon: Users,

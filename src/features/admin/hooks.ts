@@ -1,16 +1,78 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as lookupsApi from '@/api/lookups'
-import type { BranchType } from '@/types'
+import * as usersApi from '@/api/users'
+import type { AdminUserFilters, BranchType } from '@/types'
+
+const ADMIN_USERS_KEY = ['users', 'admin']
+
+export function useAdminUsers(filters: AdminUserFilters) {
+  return useQuery({
+    queryKey: [...ADMIN_USERS_KEY, filters],
+    queryFn: () => usersApi.listAdminUsers(filters),
+    placeholderData: (previous) => previous,
+  })
+}
+
+export function useUpdateUser(id: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: {
+      name?: string
+      email?: string
+      mobile?: string | null
+      employee_code?: string | null
+      department_id?: string | null
+    }) => usersApi.updateUser(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_USERS_KEY })
+      toast.success('User updated.')
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error) ?? 'Could not update the user.')
+    },
+  })
+}
+
+export function useUpdateUserStatus(id: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (isActive: boolean) => usersApi.updateUserStatus(id, isActive),
+    onSuccess: (user) => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_USERS_KEY })
+      toast.success(user.is_active ? 'User enabled.' : 'User disabled.')
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error) ?? 'Could not update the user.')
+    },
+  })
+}
+
+export function useRelieveUser(id: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (relievedOn: string) => usersApi.relieveUser(id, relievedOn),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_USERS_KEY })
+      toast.success('User marked relieved.')
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error) ?? 'Could not mark the user relieved.')
+    },
+  })
+}
 
 export function useUpdateUserManager() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: ({ userId, managerId }: { userId: string; managerId: string | null }) =>
-      lookupsApi.updateUserManager(userId, managerId),
+      usersApi.updateUserManager(userId, managerId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ADMIN_USERS_KEY })
       toast.success('Manager updated.')
     },
     onError: (error: unknown) => {

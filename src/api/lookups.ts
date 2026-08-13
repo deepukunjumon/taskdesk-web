@@ -7,7 +7,6 @@ import type {
   Department,
   DepartmentOption,
   SlaSetting,
-  User,
   UserOption,
 } from '@/types'
 
@@ -122,10 +121,6 @@ export function listSlaSettings() {
   return apiClient.get<ApiResponse<SlaSetting[]>>('/sla-settings').then((res) => res.data.data)
 }
 
-export function listUsers() {
-  return apiClient.get<ApiResponse<User[]>>('/users').then((res) => res.data.data)
-}
-
 /**
  * The actor's own record plus everyone they're allowed to assign a task to,
  * in the minimal UserOption shape (id, name, department_id) — this endpoint
@@ -138,11 +133,5 @@ export function listAssignableUsers(departmentId?: string, q?: string) {
     .get<ApiResponse<UserOption[]>>('/users/me/assignable', {
       params: { department_id: departmentId, q },
     })
-    .then((res) => res.data.data)
-}
-
-export function updateUserManager(userId: string, managerId: string | null) {
-  return apiClient
-    .patch<ApiResponse<User>>(`/users/${userId}/manager`, { manager_id: managerId })
     .then((res) => res.data.data)
 }

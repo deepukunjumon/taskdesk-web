@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAssignableUsers, useDepartmentOptions } from '@/features/work-register/hooks'
+import { useAuthStore } from '@/stores/authStore'
 import {
   ENTRY_TYPES,
   FILTERABLE_STATUSES,
@@ -31,10 +32,26 @@ export function WorkItemFiltersBar({
   const [departmentQuery, setDepartmentQuery] = useState('')
   const [assigneeQuery, setAssigneeQuery] = useState('')
 
+  const user = useAuthStore((state) => state.user)
+  const isManager = user ? user.roles.every((role) => role === 'user') : false
+
   const { data: departments, isLoading: departmentsLoading } = useDepartmentOptions(
     showDepartmentFilter,
     departmentQuery,
   )
+  // Unscoped — used only to derive which departments this actor actually has
+  // a report in, so a manager's Department filter never offers one they have
+  // no visibility into (they'd always get zero results). Admin/superadmin
+  // skip this entirely and see every department, matching their unrestricted
+  // work-item scope.
+  const { data: allAssignableUsers } = useAssignableUsers(showDepartmentFilter && isManager)
+  const allowedDepartmentIds = isManager
+    ? new Set((allAssignableUsers ?? []).map((u) => u.department_id).filter((id): id is string => !!id))
+    : null
+  const departmentOptions = allowedDepartmentIds
+    ? (departments ?? []).filter((dept) => allowedDepartmentIds.has(dept.id))
+    : departments
+
   // Scoped per actor — self + hierarchy descendants for a plain manager,
   // everyone for admin/superadmin — same endpoint the assign-to dropdown
   // uses, so this filter never needs the admin-only /users endpoint.
@@ -134,7 +151,7 @@ export function WorkItemFiltersBar({
             searchPlaceholder="Search departments..."
             options={[
               { value: ALL, label: 'All' },
-              ...(departments ?? []).map((dept) => ({ value: dept.id, label: dept.name })),
+              ...(departmentOptions ?? []).map((dept) => ({ value: dept.id, label: dept.name })),
             ]}
           />
         </div>
