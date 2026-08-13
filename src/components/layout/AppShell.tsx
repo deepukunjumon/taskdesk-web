@@ -10,7 +10,7 @@ export function AppShell() {
   const closeSidebar = useUiStore((state) => state.closeSidebar)
 
   return (
-    <div className="flex min-h-svh">
+    <div className="flex h-svh overflow-hidden">
       <Sidebar />
 
       {isSidebarOpen && (
@@ -28,7 +28,7 @@ export function AppShell() {
         )}
       >
         <Header />
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
           <Outlet />
         </main>
         <Footer />

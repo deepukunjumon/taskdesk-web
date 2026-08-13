@@ -80,42 +80,42 @@ export function WorkItemsTable({
 
   return (
     <div className="space-y-3">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columns.map((col) => (
-                <TableHead key={col}>{col}</TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.map((item, index) => (
-              <TableRow
-                key={item.id}
-                className="cursor-pointer"
-                onClick={() => onRowClick(item)}
-              >
-                <TableCell>{startIndex + index + 1}</TableCell>
-                <TableCell>{format(new Date(item.created_at), 'dd MMM yyyy')}</TableCell>
-                <TableCell className="font-medium">{item.task_id}</TableCell>
-                <TableCell className="capitalize">{item.entry_type.replace('_', ' ')}</TableCell>
-                <TableCell>{item.assigned_by?.name ?? ''}</TableCell>
-                {showAssigneeColumn && <TableCell>{item.assigned_to?.name ?? ''}</TableCell>}
-                <TableCell className="capitalize">{item.source.replace('_', ' ')}</TableCell>
-                <TableCell>{item.branch?.name ?? ''}</TableCell>
-                <TableCell>
-                  <PriorityBadge priority={item.priority} />
-                </TableCell>
-                <TableCell className="max-w-60 truncate">{item.subject}</TableCell>
-                <TableCell>
-                  <StatusBadge status={item.status} />
-                </TableCell>
-              </TableRow>
+      <Table containerClassName="h-[450px] overflow-y-auto overscroll-contain rounded-md border">
+        <TableHeader className="sticky top-0 z-10 bg-background">
+          <TableRow>
+            {columns.map((col) => (
+              <TableHead key={col} className="sticky top-0 bg-background">
+                {col}
+              </TableHead>
             ))}
-          </TableBody>
-        </Table>
-      </div>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((item, index) => (
+            <TableRow
+              key={item.id}
+              className="cursor-pointer"
+              onClick={() => onRowClick(item)}
+            >
+              <TableCell>{startIndex + index + 1}</TableCell>
+              <TableCell>{format(new Date(item.created_at), 'dd MMM yyyy')}</TableCell>
+              <TableCell className="font-medium">{item.task_id}</TableCell>
+              <TableCell className="capitalize">{item.entry_type.replace('_', ' ')}</TableCell>
+              <TableCell>{item.assigned_by?.name ?? ''}</TableCell>
+              {showAssigneeColumn && <TableCell>{item.assigned_to?.name ?? ''}</TableCell>}
+              <TableCell className="capitalize">{item.source.replace('_', ' ')}</TableCell>
+              <TableCell>{item.branch?.name ?? ''}</TableCell>
+              <TableCell>
+                <PriorityBadge priority={item.priority} />
+              </TableCell>
+              <TableCell className="max-w-60 truncate">{item.subject}</TableCell>
+              <TableCell>
+                <StatusBadge status={item.status} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       {data && <TablePagination meta={data.meta} onPageChange={onPageChange} />}
     </div>
