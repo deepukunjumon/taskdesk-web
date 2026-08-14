@@ -22,17 +22,18 @@ export function UserFiltersBar({ filters, onChange }: UserFiltersBarProps) {
     departmentQuery,
   )
 
+  // Pagination is owned by the parent's usePaginatedQuery, not by this
+  // filters object — the parent's onChange handler is responsible for
+  // resetting back to page 1 whenever a filter actually changes.
   function set<K extends keyof AdminUserFilters>(key: K, value: AdminUserFilters[K] | undefined) {
-    onChange({ ...filters, [key]: value, page: 1 })
+    onChange({ ...filters, [key]: value })
   }
 
   function clearAll() {
-    onChange({ page: 1, per_page: filters.per_page })
+    onChange({})
   }
 
-  const hasActiveFilters = Object.entries(filters).some(
-    ([key, value]) => !['page', 'per_page'].includes(key) && Boolean(value),
-  )
+  const hasActiveFilters = Object.entries(filters).some(([, value]) => Boolean(value))
 
   return (
     <div className="flex flex-wrap items-end gap-3">

@@ -17,7 +17,15 @@ export interface PaginatedMeta {
   total: number
 }
 
+export interface PaginatedLinks {
+  first: string | null
+  last: string | null
+  prev: string | null
+  next: string | null
+}
+
 export interface PaginatedResponse<T> {
   data: T[]
   meta: PaginatedMeta
+  links: PaginatedLinks
 }

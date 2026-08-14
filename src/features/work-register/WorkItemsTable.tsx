@@ -8,10 +8,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { DataTablePagination } from '@/components/ui/data-table-pagination'
 import { StatusBadge } from '@/features/work-register/StatusBadge'
 import { PriorityBadge } from '@/features/work-register/PriorityBadge'
-import { TablePagination } from '@/features/work-register/TablePagination'
-import type { PaginatedResponse, WorkItem } from '@/types'
+import type { PaginatedMeta, WorkItem } from '@/types'
 
 const BASE_COLUMNS = [
   'Sl.No',
@@ -28,21 +28,25 @@ const BASE_COLUMNS = [
 ]
 
 interface WorkItemsTableProps {
-  data: PaginatedResponse<WorkItem> | undefined
+  items: WorkItem[] | undefined
+  meta: PaginatedMeta | undefined
   isLoading: boolean
   isError: boolean
   onRowClick: (item: WorkItem) => void
   onPageChange: (page: number) => void
+  onPerPageChange: (perPage: number) => void
   /** Every row is already the current user — e.g. My Tasks — so the column is redundant. */
   showAssigneeColumn?: boolean
 }
 
 export function WorkItemsTable({
-  data,
+  items: itemsProp,
+  meta,
   isLoading,
   isError,
   onRowClick,
   onPageChange,
+  onPerPageChange,
   showAssigneeColumn = true,
 }: WorkItemsTableProps) {
   const columns = showAssigneeColumn
@@ -66,7 +70,7 @@ export function WorkItemsTable({
     )
   }
 
-  const items = data?.data ?? []
+  const items = itemsProp ?? []
 
   if (items.length === 0) {
     return (
@@ -76,11 +80,11 @@ export function WorkItemsTable({
     )
   }
 
-  const startIndex = ((data?.meta.current_page ?? 1) - 1) * (data?.meta.per_page ?? 15)
+  const startIndex = ((meta?.current_page ?? 1) - 1) * (meta?.per_page ?? 15)
 
   return (
     <div className="space-y-3">
-      <Table containerClassName="h-[450px] overflow-y-auto overscroll-contain rounded-md border">
+      <Table containerClassName="overflow-y-auto overscroll-contain rounded-md border">
         <TableHeader className="sticky top-0 z-10 bg-background">
           <TableRow>
             {columns.map((col) => (
@@ -117,7 +121,9 @@ export function WorkItemsTable({
         </TableBody>
       </Table>
 
-      {data && <TablePagination meta={data.meta} onPageChange={onPageChange} />}
+      {meta && (
+        <DataTablePagination meta={meta} onPageChange={onPageChange} onPerPageChange={onPerPageChange} />
+      )}
     </div>
   )
 }

@@ -10,11 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { TablePagination } from '@/features/work-register/TablePagination'
+import { DataTablePagination } from '@/components/ui/data-table-pagination'
 import { UserEditSheet } from '@/features/admin/UserEditSheet'
 import { UserRelieveDialog } from '@/features/admin/UserRelieveDialog'
 import { UserFiltersBar } from '@/features/admin/UserFiltersBar'
-import { useAdminUsers, useUpdateUserStatus } from '@/features/admin/hooks'
+import { useUpdateUserStatus } from '@/features/admin/hooks'
+import { listAdminUsers } from '@/api/users'
+import { usePaginatedQuery } from '@/hooks/usePaginatedQuery'
 import type { AdminUserFilters, User } from '@/types'
 
 function StatusBadge({ user }: { user: User }) {
@@ -76,9 +78,24 @@ function UserRow({ user, slNo }: { user: User; slNo: number }) {
 }
 
 export function ReportingStructurePage() {
-  const [filters, setFilters] = useState<AdminUserFilters>({ page: 1, per_page: 15 })
-  const { data, isLoading, isError } = useAdminUsers(filters)
-  const startIndex = ((data?.meta.current_page ?? 1) - 1) * (data?.meta.per_page ?? 15)
+  const [filters, setFilters] = useState<AdminUserFilters>({})
+  const { data, meta, isLoading, isError, setPage, setPerPage } = usePaginatedQuery<
+    User,
+    AdminUserFilters
+  >({
+    // Matches the key admin/hooks.ts mutations already invalidate on
+    // edit/status/relieve/manager changes, so those keep working unchanged.
+    queryKey: ['users', 'admin'],
+    queryFn: listAdminUsers,
+    filters,
+  })
+
+  function handleFiltersChange(next: AdminUserFilters) {
+    setFilters(next)
+    setPage(1)
+  }
+
+  const startIndex = ((meta?.current_page ?? 1) - 1) * (meta?.per_page ?? 15)
 
   return (
     <div className="space-y-4">
@@ -90,7 +107,7 @@ export function ReportingStructurePage() {
         </p>
       </div>
 
-      <UserFiltersBar filters={filters} onChange={setFilters} />
+      <UserFiltersBar filters={filters} onChange={handleFiltersChange} />
 
       {isError ? (
         <p className="text-sm text-destructive">Could not load users.</p>
@@ -117,14 +134,14 @@ export function ReportingStructurePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.data.length === 0 ? (
+                {data?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center text-sm text-muted-foreground">
                       No users found.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  data?.data.map((user, index) => (
+                  data?.map((user, index) => (
                     <UserRow key={user.id} user={user} slNo={startIndex + index + 1} />
                   ))
                 )}
@@ -132,11 +149,8 @@ export function ReportingStructurePage() {
             </Table>
           </div>
 
-          {data && (
-            <TablePagination
-              meta={data.meta}
-              onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
-            />
+          {meta && (
+            <DataTablePagination meta={meta} onPageChange={setPage} onPerPageChange={setPerPage} />
           )}
         </div>
       )}

@@ -2,22 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as workItemsApi from '@/api/workItems'
 import * as lookupsApi from '@/api/lookups'
-import type {
-  CreateWorkItemPayload,
-  UpdateWorkItemPayload,
-  WorkItemFilters,
-  WorkItemStatus,
-} from '@/types'
+import type { CreateWorkItemPayload, UpdateWorkItemPayload, WorkItemStatus } from '@/types'
 
 const WORK_ITEMS_KEY = 'work-items'
-
-export function useWorkItems(filters: WorkItemFilters) {
-  return useQuery({
-    queryKey: [WORK_ITEMS_KEY, filters],
-    queryFn: () => workItemsApi.listWorkItems(filters),
-    placeholderData: (previous) => previous,
-  })
-}
 
 export function useWorkItem(id: string | null) {
   return useQuery({

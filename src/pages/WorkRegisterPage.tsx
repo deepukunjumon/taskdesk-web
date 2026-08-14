@@ -4,17 +4,30 @@ import { WorkItemsTable } from '@/features/work-register/WorkItemsTable'
 import { WorkItemFiltersBar } from '@/features/work-register/WorkItemFiltersBar'
 import { WorkItemDetailSheet } from '@/features/work-register/WorkItemDetailSheet'
 import { WorkItemCreateSheet } from '@/features/work-register/WorkItemCreateSheet'
-import { useWorkItems } from '@/features/work-register/hooks'
+import { listWorkItems } from '@/api/workItems'
+import { usePaginatedQuery } from '@/hooks/usePaginatedQuery'
 import { useAuthStore } from '@/stores/authStore'
 import type { WorkItem, WorkItemFilters } from '@/types'
 
 export function WorkRegisterPage() {
   const user = useAuthStore((state) => state.user)
-  const [filters, setFilters] = useState<WorkItemFilters>({ page: 1, per_page: 15 })
+  const [filters, setFilters] = useState<WorkItemFilters>({})
   const [selectedItem, setSelectedItem] = useState<WorkItem | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
 
-  const { data, isLoading, isError } = useWorkItems(filters)
+  const { data, meta, isLoading, isError, setPage, setPerPage } = usePaginatedQuery<
+    WorkItem,
+    WorkItemFilters
+  >({
+    queryKey: ['work-items'],
+    queryFn: listWorkItems,
+    filters,
+  })
+
+  function handleFiltersChange(next: WorkItemFilters) {
+    setFilters(next)
+    setPage(1)
+  }
 
   return (
     <div className="space-y-4">
@@ -27,17 +40,19 @@ export function WorkRegisterPage() {
 
       <WorkItemFiltersBar
         filters={filters}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         showDepartmentFilter
         showAssigneeFilter
       />
 
       <WorkItemsTable
-        data={data}
+        items={data}
+        meta={meta}
         isLoading={isLoading}
         isError={isError}
         onRowClick={setSelectedItem}
-        onPageChange={(page) => setFilters((f) => ({ ...f, page }))}
+        onPageChange={setPage}
+        onPerPageChange={setPerPage}
       />
 
       <WorkItemDetailSheet

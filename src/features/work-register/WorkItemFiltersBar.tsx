@@ -66,8 +66,11 @@ export function WorkItemFiltersBar({
     assigneeQuery,
   )
 
+  // Pagination is owned by the parent's usePaginatedQuery, not by this
+  // filters object — the parent's onChange handler is responsible for
+  // resetting back to page 1 whenever a filter actually changes.
   function set<K extends keyof WorkItemFilters>(key: K, value: WorkItemFilters[K] | undefined) {
-    onChange({ ...filters, [key]: value, page: 1 })
+    onChange({ ...filters, [key]: value })
   }
 
   function setMulti<K extends 'status' | 'priority' | 'entry_type' | 'department_id' | 'assigned_to_id'>(
@@ -78,13 +81,12 @@ export function WorkItemFiltersBar({
   }
 
   function clearAll() {
-    onChange({ page: 1, per_page: filters.per_page })
+    onChange({})
   }
 
   const hasActiveFilters = Object.entries(filters).some(
     ([key, value]) =>
-      !['page', 'per_page', 'sort_by', 'sort_dir'].includes(key) &&
-      (Array.isArray(value) ? value.length > 0 : Boolean(value)),
+      !['sort_by', 'sort_dir'].includes(key) && (Array.isArray(value) ? value.length > 0 : Boolean(value)),
   )
 
   return (
