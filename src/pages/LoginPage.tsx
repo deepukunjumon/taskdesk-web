@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LayoutGrid } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -63,7 +63,7 @@ export function LoginPage() {
             Keep every task moving, on time.
           </h2>
           <p className="text-primary-foreground/70">
-            Assign work across your team, track status end to end, and stay ahead of SLAs — all
+            Assign work across your team, track status end to end, and stay ahead of SLAs - all
             in one place.
           </p>
         </div>
@@ -133,6 +133,14 @@ export function LoginPage() {
                 {isSubmitting ? 'Signing in...' : 'Sign in'}
               </Button>
             </form>
+            <p className="mt-4 text-right text-sm text-muted-foreground">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+            </p>
           </div>
         </div>
 
