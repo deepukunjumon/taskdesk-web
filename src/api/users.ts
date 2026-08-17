@@ -1,10 +1,23 @@
 import { apiClient } from '@/api/client'
-import type { AdminUserFilters, ApiResponse, PaginatedResponse, User } from '@/types'
+import type { AdminUserFilters, ApiResponse, PaginatedResponse, Role, User } from '@/types'
 
 export function listAdminUsers(filters: AdminUserFilters = {}) {
   return apiClient
     .get<PaginatedResponse<User>>('/users', { params: filters })
     .then((res) => res.data)
+}
+
+export function createUser(payload: {
+  name: string
+  email: string
+  password: string
+  role: Role
+  mobile?: string | null
+  employee_code?: string | null
+  department_id?: string | null
+  manager_id?: string | null
+}) {
+  return apiClient.post<ApiResponse<User>>('/users', payload).then((res) => res.data.data)
 }
 
 export function updateUser(

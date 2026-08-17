@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import * as lookupsApi from '@/api/lookups'
 import * as usersApi from '@/api/users'
-import type { AdminUserFilters, BranchType } from '@/types'
+import type { AdminUserFilters, BranchType, Role } from '@/types'
 
 const ADMIN_USERS_KEY = ['users', 'admin']
 
@@ -11,6 +11,30 @@ export function useAdminUsers(filters: AdminUserFilters) {
     queryKey: [...ADMIN_USERS_KEY, filters],
     queryFn: () => usersApi.listAdminUsers(filters),
     placeholderData: (previous) => previous,
+  })
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: {
+      name: string
+      email: string
+      password: string
+      role: Role
+      mobile?: string | null
+      employee_code?: string | null
+      department_id?: string | null
+      manager_id?: string | null
+    }) => usersApi.createUser(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_USERS_KEY })
+      toast.success('User created.')
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error) ?? 'Could not create the user.')
+    },
   })
 }
 

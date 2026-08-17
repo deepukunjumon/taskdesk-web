@@ -13,6 +13,7 @@ import {
 import { DataTablePagination } from '@/components/ui/data-table-pagination'
 import { UserEditSheet } from '@/features/admin/UserEditSheet'
 import { UserRelieveDialog } from '@/features/admin/UserRelieveDialog'
+import { UserCreateSheet } from '@/features/admin/UserCreateSheet'
 import { UserFiltersBar } from '@/features/admin/UserFiltersBar'
 import { useUpdateUserStatus } from '@/features/admin/hooks'
 import { listAdminUsers } from '@/api/users'
@@ -79,6 +80,7 @@ function UserRow({ user, slNo }: { user: User; slNo: number }) {
 
 export function ReportingStructurePage() {
   const [filters, setFilters] = useState<AdminUserFilters>({})
+  const [createOpen, setCreateOpen] = useState(false)
   const { data, meta, isLoading, isError, setPage, setPerPage } = usePaginatedQuery<
     User,
     AdminUserFilters
@@ -99,12 +101,15 @@ export function ReportingStructurePage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Users</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage user details, status, and each user's manager — this determines who can assign
-          tasks to them, at any depth in the chain.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Users</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage user details, status, and each user's manager — this determines who can assign
+            tasks to them, at any depth in the chain.
+          </p>
+        </div>
+        <Button onClick={() => setCreateOpen(true)}>Add User</Button>
       </div>
 
       <UserFiltersBar filters={filters} onChange={handleFiltersChange} />
@@ -154,6 +159,8 @@ export function ReportingStructurePage() {
           )}
         </div>
       )}
+
+      <UserCreateSheet open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   )
 }
