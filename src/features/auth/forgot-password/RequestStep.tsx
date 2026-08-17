@@ -2,7 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { requestPasswordResetOtp } from '@/api/passwordReset'
-import { getErrorStatus } from '@/features/auth/forgot-password/utils'
+import { getErrorStatus, getValidationError } from '@/features/auth/forgot-password/utils'
 
 interface RequestStepProps {
   onSubmitted: (email: string) => void
@@ -22,7 +22,11 @@ export function RequestStep({ onSubmitted }: RequestStepProps) {
       await requestPasswordResetOtp(email)
       onSubmitted(email)
     } catch (err) {
-      if (getErrorStatus(err) === 429) {
+      const emailError = getValidationError(err, 'email')
+
+      if (emailError) {
+        setError(emailError)
+      } else if (getErrorStatus(err) === 429) {
         setError('Too many requests. Please wait a while before trying again.')
       } else {
         setError('Something went wrong. Please try again.')

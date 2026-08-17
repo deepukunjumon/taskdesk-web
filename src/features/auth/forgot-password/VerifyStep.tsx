@@ -123,8 +123,8 @@ export function VerifyStep({ email, onVerified, onRestart }: VerifyStepProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
-        If an account exists for <span className="font-medium text-foreground">{email}</span>,
-        we've sent a 6-digit verification code. Enter it below.
+        We sent a 6-digit verification code to{' '}
+        <span className="font-medium text-foreground">{email}</span>. Enter it below.
       </p>
 
       <div className="flex justify-between gap-2">

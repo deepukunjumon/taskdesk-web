@@ -27,3 +27,18 @@ export function getErrorMessage(error: unknown): string | undefined {
   }
   return undefined
 }
+
+/**
+ * 
+ * @param error 
+ * @param field 
+ * @returns 
+ */
+export function getValidationError(error: unknown, field: string): string | undefined {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const errors = (error as { response?: { data?: { errors?: Record<string, string[]> } } })
+      .response?.data?.errors
+    return errors?.[field]?.[0]
+  }
+  return undefined
+}
