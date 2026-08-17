@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -41,6 +43,7 @@ interface UserCreateFormProps {
 
 export function UserCreateForm({ onSubmit, isSubmitting, availableRoles }: UserCreateFormProps) {
   const { data: departments, isLoading: departmentsLoading } = useDepartmentOptions()
+  const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm<UserCreateFormValues>({
     resolver: zodResolver(userCreateFormSchema),
@@ -60,7 +63,7 @@ export function UserCreateForm({ onSubmit, isSubmitting, availableRoles }: UserC
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
         <FormField
           control={form.control}
           name="name"
@@ -82,7 +85,7 @@ export function UserCreateForm({ onSubmit, isSubmitting, availableRoles }: UserC
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="jane@company.com" {...field} />
+                <Input type="email" placeholder="jane@company.com" autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -96,7 +99,23 @@ export function UserCreateForm({ onSubmit, isSubmitting, availableRoles }: UserC
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="At least 8 characters" {...field} />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="At least 8 characters"
+                    autoComplete="new-password"
+                    className="pr-9"
+                    {...field}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
