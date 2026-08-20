@@ -7,6 +7,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { WorkRegisterPage } from '@/pages/WorkRegisterPage'
 import { MyTasksPage } from '@/pages/MyTasksPage'
+import { MyTeamPage } from '@/pages/MyTeamPage'
 import { ReportingStructurePage } from '@/pages/ReportingStructurePage'
 import { DepartmentsPage } from '@/pages/DepartmentsPage'
 import { CategoriesPage } from '@/pages/CategoriesPage'
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
             ),
           },
           { path: 'my-tasks', element: <MyTasksPage /> },
+          { path: 'my-team', element: <MyTeamPage /> },
           {
             path: 'reports',
             element: (

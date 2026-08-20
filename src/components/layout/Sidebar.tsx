@@ -71,6 +71,14 @@ const NAV_ITEMS: NavEntry[] = [
   },
   {
     type: 'link',
+    label: 'My Team',
+    to: '/my-team',
+    roles: ['user'],
+    icon: Users,
+    isVisible: (user) => user.abilities?.is_reporting_manager ?? false,
+  },
+  {
+    type: 'link',
     label: 'Reports',
     to: '/reports',
     roles: ['superadmin', 'admin'],
@@ -231,7 +239,7 @@ export function Sidebar() {
                       <NavLink
                         key={child.to}
                         to={child.to}
-                        onClick={handleNavClick}
+                        onClick={() => handleNavClick()}
                         className={({ isActive }) =>
                           cn(
                             'rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
@@ -253,7 +261,7 @@ export function Sidebar() {
               key={item.to}
               to={item.to}
               end={item.to === '/'}
-              onClick={handleNavClick}
+              onClick={() => handleNavClick()}
               title={isOpen ? undefined : item.label}
               className={linkClassName}
             >

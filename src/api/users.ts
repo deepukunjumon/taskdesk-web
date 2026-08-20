@@ -61,3 +61,8 @@ export function updateUserManager(userId: string, managerId: string | null) {
     .patch<ApiResponse<User>>(`/users/${userId}/manager`, { manager_id: managerId })
     .then((res) => res.data.data)
 }
+
+/** The authenticated user's own direct reports — "my team" for a reporting manager. */
+export function listMyReports() {
+  return apiClient.get<ApiResponse<User[]>>('/users/me/reports').then((res) => res.data.data)
+}
