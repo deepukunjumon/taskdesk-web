@@ -5,8 +5,8 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Footer } from '@/components/layout/Footer'
+import { AuthBrandPanel } from '@/components/auth/AuthBrandPanel'
 import { useAuthStore } from '@/stores/authStore'
-import packageJson from '../../package.json'
 
 export function LoginPage() {
   const token = useAuthStore((state) => state.token)
@@ -40,52 +40,18 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      {/* Left — branding panel, hidden below lg */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-10 text-primary-foreground lg:flex">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-            backgroundSize: '28px 28px',
-          }}
-        />
+      <AuthBrandPanel />
 
-        <div className="relative flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground/10">
-            <LayoutGrid className="size-4.5" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight">TaskDesk</span>
-        </div>
-
-        <div className="relative max-w-md space-y-3">
-          <h2 className="text-3xl font-semibold tracking-tight text-balance">
-            Keep every task moving, on time.
-          </h2>
-          <p className="text-primary-foreground/70">
-            Assign work across your team, track status end to end, and stay ahead of SLAs - all
-            in one place.
-          </p>
-        </div>
-
-        <p className="relative text-sm text-primary-foreground/50">
-          TaskDesk v{packageJson.version} &copy; {new Date().getFullYear()}
-        </p>
-      </div>
-
-      {/* Right — form */}
       <div className="flex flex-col bg-background">
         <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-sm">
-            <div className="mb-8 flex flex-col gap-3 lg:hidden">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <LayoutGrid className="size-4.5" />
-              </div>
+            <div className="mb-10 flex items-center gap-2.5 lg:hidden">
+              <span className="text-lg font-semibold tracking-tight">TaskDesk</span>
             </div>
 
             <div className="mb-8 space-y-1.5">
-              <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-              <p className="text-sm text-muted-foreground">Sign in to your TaskDesk account</p>
+              <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+              <p className="text-sm text-muted-foreground">Enter your details to access your account</p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">

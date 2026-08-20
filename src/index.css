@@ -82,3 +82,78 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Auth brand panel — subtle motion for the illustration and background blobs. */
+@layer utilities {
+  @keyframes auth-float-a {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes auth-float-b {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(8px);
+    }
+  }
+  @keyframes auth-blob-drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(-14px, 14px) scale(1.06);
+    }
+  }
+  @keyframes auth-draw-check {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes auth-pulse-soft {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.9;
+    }
+  }
+  .auth-float-a {
+    animation: auth-float-a 6s ease-in-out infinite;
+  }
+  .auth-float-b {
+    animation: auth-float-b 7s ease-in-out infinite 0.3s;
+  }
+  .auth-blob-drift {
+    animation: auth-blob-drift 11s ease-in-out infinite;
+  }
+  .auth-draw-check {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: auth-draw-check 0.7s 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  .auth-pulse-soft {
+    animation: auth-pulse-soft 3s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-float-a,
+  .auth-float-b,
+  .auth-blob-drift,
+  .auth-pulse-soft {
+    animation: none;
+  }
+  .auth-draw-check {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
