@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, LayoutGrid } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
